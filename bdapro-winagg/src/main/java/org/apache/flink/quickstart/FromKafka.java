@@ -104,7 +104,7 @@ public class FromKafka {
                 //filter out those events that are not starting
                 .filter(x->x.isStart)
                 //just keep important variables
-                .map(new GetMean.MapToPassenger())
+                .map(new FromKafka.MapToPassenger())
                 //grouping all values
 
                 //TODO group by timestamp
@@ -113,7 +113,7 @@ public class FromKafka {
                 // tumbling time window of 1 minute length
                 .timeWindow(Time.minutes(60))
                 //get average passenger in that time window
-                .apply(new GetMean.RideCounter());
+                .apply(new FromKafka.RideCounter());
 
 
         // print result on stdout
@@ -146,28 +146,27 @@ public class FromKafka {
     }
 
     /**
-     * Maps taxi ride to grid cell and event type.
-     * Start records use departure location, end record use arrival location.
+     Maps Taxiride so just id of ride and passengercount stays
      */
-    public static class GridCellMatcher implements MapFunction<TaxiRide, Tuple2<Integer, Boolean>> {
+    public static class MapToPassenger implements MapFunction<TaxiRide, Tuple2<Long, Integer>> {
 
         @Override
-        public Tuple2<Integer, Boolean> map(TaxiRide taxiRide) throws Exception {
-            return new Tuple2<>(
-                    GeoUtils.mapToGridCell(taxiRide.startLon, taxiRide.startLat),
-                    taxiRide.isStart
-            );
+        public Tuple2<Long, Integer> map(TaxiRide taxiRide) throws Exception {
+
+            return new Tuple2<Long,Integer>(Long.valueOf(1), Integer.valueOf(taxiRide.passengerCnt));
+
         }
     }
 
+
     /**
-     * Counts the number of rides arriving or departing.
+     * Returns the average number of passengers in a specific time window
      */
     public static class RideCounter implements WindowFunction<
-            Tuple2<Integer, Boolean>,                // input type
-            Tuple4<Integer, Long, Boolean, Integer>, // output type
-            Tuple,                                   // key type
-            TimeWindow>                              // window type
+            Tuple2<Long, Integer>, // input type
+            Tuple3<Double,Integer,Time>, // output type
+            Tuple, // key type
+            TimeWindow> // window type
     {
 
         @SuppressWarnings("unchecked")
@@ -175,40 +174,26 @@ public class FromKafka {
         public void apply(
                 Tuple key,
                 TimeWindow window,
-                Iterable<Tuple2<Integer, Boolean>> gridCells,
-                Collector<Tuple4<Integer, Long, Boolean, Integer>> out) throws Exception {
+                Iterable<Tuple2<Long, Integer>> values,
+                Collector<Tuple3<Double,Integer,Time>> out) throws Exception {
 
-            int cellId = ((Tuple2<Integer, Boolean>)key).f0;
-            boolean isStart = ((Tuple2<Integer, Boolean>)key).f1;
-            long windowTime = window.getEnd();
+//            Long cellId = ((Tuple2<Long, Integer>)key).f0;
+            //           Integer passenger = ((Tuple2<Long, Integer>)key).f1;
+            long windowTime = window.getStart();
+            Double cnt = 0.0;
+            Double sum = 0.0;
 
-            int cnt = 0;
-            for(Tuple2<Integer, Boolean> c : gridCells) {
+            for(Tuple2<Long, Integer> v : values) {
                 cnt += 1;
+                sum += v.f1;
             }
 
-            out.collect(new Tuple4<>(cellId, windowTime, isStart, cnt));
+            out.collect(new Tuple3<>(Double.valueOf( Math.round(sum/cnt*1000.0)/1000.0),cnt.intValue(), Time.hours(windowTime)));
+            //out.collect(new Tuple1<>( Double.valueOf( Math.round(cnt*100.0)/100.0)));
         }
     }
 
-    /**
-     * Maps the grid cell id back to longitude and latitude coordinates.
-     */
-    public static class GridToCoordinates implements
-            MapFunction<Tuple4<Integer, Long, Boolean, Integer>, Tuple5<Float, Float, Long, Boolean, Integer>> {
 
-        @Override
-        public Tuple5<Float, Float, Long, Boolean, Integer> map(
-                Tuple4<Integer, Long, Boolean, Integer> cellCount) throws Exception {
-
-            return new Tuple5<>(
-                    GeoUtils.getGridCellCenterLon(cellCount.f0),
-                    GeoUtils.getGridCellCenterLat(cellCount.f0),
-                    cellCount.f1,
-                    cellCount.f2,
-                    cellCount.f3);
-        }
-    }
 
 
 }
