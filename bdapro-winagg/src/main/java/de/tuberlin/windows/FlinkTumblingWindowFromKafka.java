@@ -4,6 +4,7 @@ import com.dataartisans.flinktraining.exercises.datastream_java.datatypes.TaxiRi
 import com.dataartisans.flinktraining.exercises.datastream_java.utils.TaxiRideSchema;
 import de.tuberlin.io.Conf;
 import org.apache.flink.api.java.tuple.Tuple3;
+import org.apache.flink.hadoop.shaded.org.apache.http.impl.conn.SystemDefaultDnsResolver;
 import org.apache.flink.streaming.api.TimeCharacteristic;
 import org.apache.flink.streaming.api.datastream.DataStream;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
@@ -39,7 +40,7 @@ public class FlinkTumblingWindowFromKafka {
 
         // set up streaming execution environment
         StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
-        env.setStreamTimeCharacteristic(TimeCharacteristic.EventTime);
+        env.setStreamTimeCharacteristic(TimeCharacteristic.IngestionTime);
         env.getConfig().setAutoWatermarkInterval(1000);
 
         // configure the Kafka consumer
@@ -79,14 +80,13 @@ public class FlinkTumblingWindowFromKafka {
                 .timeWindow(Time.seconds(windowTime))
 
                 //sums the 1s and the passengers for the whole window
-                .reduce( new Aggregations.SumAllValues())
-
-                .map(new Aggregations.MapToMean());
+            //   .reduce( new Aggregations.SumAllValues())
+                  .apply(new Aggregations.PassengerCounter())      ;
+             //  .map(new Aggregations.MapToMean());
 
 
         // print result on stdout
         averagePassengers.print();
-
         // execute the transformation pipeline
         env.execute("Windowed Aggregation from Kafka with Flink");
     }
@@ -104,10 +104,12 @@ public class FlinkTumblingWindowFromKafka {
         @Override
         public long extractTimestamp(TaxiRide ride) {
             if (ride.isStart) {
-                return ride.startTime.getMillis();
+              //  return ride.startTime.getMillis();
+                return System.currentTimeMillis();
             }
             else {
-                return ride.endTime.getMillis();
+                //return ride.endTime.getMillis();
+                return System.currentTimeMillis();
             }
         }
     }

@@ -56,9 +56,9 @@ public class Aggregations {
     /**
      * Returns the average number of passengers in a specific time window
      */
-    public static class RideCounter implements WindowFunction<
-            Tuple2<Long, Integer>, // input type
-            Tuple4<Double,Integer,String,String>, // output type
+    public static class PassengerCounter implements WindowFunction<
+            Tuple3<Integer, Integer,Long>, // input type
+            Tuple3<Double,String,Long>, // output type
             Tuple, // key type
             TimeWindow> // window type
     {
@@ -68,23 +68,25 @@ public class Aggregations {
         public void apply(
                 Tuple key,
                 TimeWindow window,
-                Iterable<Tuple2<Long, Integer>> values,
-                Collector<Tuple4<Double,Integer,String,String>> out) throws Exception {
+                Iterable<Tuple3<Integer, Integer,Long>> values,
+                Collector<Tuple3<Double,String,Long>> out) throws Exception {
 
 //            Long cellId = ((Tuple2<Long, Integer>)key).f0;
             //           Integer passenger = ((Tuple2<Long, Integer>)key).f1;
             long windowTime = window.getStart();
+            String time=new Date(window.getStart()).toString()+" "+new Date(window.getEnd()).toString()+" "+new Date(window.maxTimestamp()).toString();
             String dateString=new Date(windowTime).toString();
             Double cnt = 0.0;
             Double sum = 0.0;
 
-            for(Tuple2<Long, Integer> v : values) {
+            for(Tuple3<Integer, Integer,Long> v : values) {
                 cnt += 1;
                 sum += v.f1;
             }
 
             Date timeStamp= new Date(System.currentTimeMillis());
-            out.collect(new Tuple4<>(Double.valueOf( Math.round(sum/cnt*1000.0)/1000.0),cnt.intValue(),dateString,timeStamp.toString() ));
+            Long duration= Long.valueOf(System.currentTimeMillis()-window.maxTimestamp());
+            out.collect(new Tuple3<>(Double.valueOf( Math.round(sum/cnt*1000.0)/1000.0)," ",duration ));
             //out.collect(new Tuple1<>( Double.valueOf( Math.round(cnt*100.0)/100.0)));
         }
     }
