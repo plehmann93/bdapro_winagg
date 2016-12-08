@@ -46,7 +46,7 @@ public class Tumbling {
                 new TaxiRideSource(pathToTaxi, maxEventDelay, servingSpeedFactor));
 
         // find average number of passengers per minute starting a taxi ride
-        DataStreamSink<Tuple3<Double,String,Long>> popularSpots = rides
+        DataStream<Tuple3<Double,String,Long>> averagePassengers = rides
                 //filter out those events that are not starting
                 .filter(x->x.isStart)
                 //just keep important variables
@@ -59,33 +59,18 @@ public class Tumbling {
                 //sums the 1s and the passengers for the whole window
                 .reduce( new Aggregations.SumAllValues())
 
-                .map(new Aggregations.MapToMean())
+                .map(new Aggregations.MapToMean());
 
-                .writeAsCsv("src/main/resources/results/tumbling/"+String.valueOf(System.currentTimeMillis())+"/");
+                //
 
-
+        //write as csv
+        //averagePassengers.writeAsCsv("src/main/resources/results/tumbling/"+String.valueOf(System.currentTimeMillis())+"/");
         // print result on stdout
-       // popularSpots.print();
+        averagePassengers.print();
 
         // execute the transformation pipeline
         env.execute("Popular Places");
     }
-
-
-    /**
-     Maps Taxiride so just id of ride and passengercount stays
-     */
-    public static class MapToPassenger implements MapFunction<TaxiRide, Tuple2<Long, Integer>> {
-
-        @Override
-        public Tuple2<Long, Integer> map(TaxiRide taxiRide) throws Exception {
-
-            return new Tuple2<Long,Integer>(new Long(1), Integer.valueOf(taxiRide.passengerCnt));
-
-        }
-    }
-
-
 
 
 
