@@ -68,7 +68,7 @@ public class FlinkTumblingWindowFromKafka {
 
                 //filter out those events that are not starting
 
-                .filter(x->x.isStart)
+                //.filter(x->x.isStart)
 
                 //just keep important variables
                 .map(new Aggregations.MapToPassenger())

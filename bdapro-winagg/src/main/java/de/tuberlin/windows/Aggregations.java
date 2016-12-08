@@ -86,7 +86,7 @@ public class Aggregations {
 
             Date timeStamp= new Date(System.currentTimeMillis());
             Long duration= Long.valueOf(System.currentTimeMillis()-window.maxTimestamp());
-            out.collect(new Tuple3<>(Double.valueOf( Math.round(sum/cnt*1000.0)/1000.0)," ",duration ));
+            out.collect(new Tuple3<>(Double.valueOf( Math.round(sum/cnt*1000.0)/1000.0),String.valueOf(cnt),duration ));
             //out.collect(new Tuple1<>( Double.valueOf( Math.round(cnt*100.0)/100.0)));
         }
     }
