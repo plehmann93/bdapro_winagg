@@ -39,7 +39,7 @@ public class Tumbling {
         final int windowTime = conf.getWindowSize();          //measured in seconds
         // set up streaming execution environment
         StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
-        env.setStreamTimeCharacteristic(TimeCharacteristic.EventTime);
+        env.setStreamTimeCharacteristic(TimeCharacteristic.ProcessingTime);
 
         // start the data generator
         DataStream<TaxiRide> rides = env.addSource(
@@ -61,7 +61,7 @@ public class Tumbling {
 
                 .map(new Aggregations.MapToMean());
 
-                //
+
 
         //write as csv
         //averagePassengers.writeAsCsv("src/main/resources/results/tumbling/"+String.valueOf(System.currentTimeMillis())+"/");
@@ -69,7 +69,7 @@ public class Tumbling {
         averagePassengers.print();
 
         // execute the transformation pipeline
-        env.execute("Popular Places");
+        env.execute("Flink Tumbling");
     }
 
 

@@ -7,6 +7,7 @@ import org.apache.flink.api.java.tuple.Tuple;
 import org.apache.flink.api.java.tuple.Tuple2;
 import org.apache.flink.api.java.tuple.Tuple3;
 import org.apache.flink.api.java.tuple.Tuple4;
+import org.apache.flink.streaming.api.functions.TimestampExtractor;
 import org.apache.flink.streaming.api.functions.windowing.WindowFunction;
 import org.apache.flink.streaming.api.windowing.windows.TimeWindow;
 import org.apache.flink.util.Collector;
@@ -22,6 +23,7 @@ public class Aggregations {
      Maps Taxiride so just id of ride and passengercount stays
      */
     public static class MapToPassenger implements MapFunction<TaxiRide, Tuple3<Integer, Integer,Long>> {
+
 
         @Override
         public Tuple3<Integer, Integer,Long> map(TaxiRide taxiRide) throws Exception {
@@ -40,7 +42,9 @@ public class Aggregations {
         public Tuple3<Double, String,Long> map( Tuple3<Integer, Integer,Long> t) throws Exception {
             Long millis=System.currentTimeMillis();
             String timeStamp = new Date(millis).toString();
-            return new Tuple3<Double,String,Long>(Math.round(t.f1/new Double(t.f0)*1000)/1000.0,timeStamp, millis-t.f2);
+            Long duration=millis-t.f2;
+
+            return new Tuple3<Double,String,Long>(Math.round(t.f1/new Double(t.f0)*1000)/1000.0,String.valueOf(t.f0), duration);
 
         }
     }
@@ -48,8 +52,33 @@ public class Aggregations {
     public static class SumAllValues implements ReduceFunction<Tuple3<Integer, Integer,Long>> {
         @Override
         public Tuple3<Integer, Integer,Long> reduce(Tuple3<Integer, Integer,Long> value1, Tuple3<Integer, Integer,Long> value2) throws Exception {
-            return new Tuple3<Integer, Integer,Long>(value1.f0+value2.f0, value1.f1+value2.f1,value1.f2);
+           Long time=value1.f2;
+            if(value1.f2<value2.f2){
+                time=value2.f2;
+            }
+            return new Tuple3<Integer, Integer,Long>(value1.f0+value2.f0, value1.f1+value2.f1,time);
         }
+    }
+
+
+
+   public static class TimeStamp implements TimestampExtractor<TaxiRide>
+
+    {
+        @Override
+        public long extractTimestamp(TaxiRide element, long currentTimestamp) {
+        return currentTimestamp;
+    }
+
+        @Override
+        public long extractWatermark(TaxiRide element, long currentTimestamp) {
+        return currentTimestamp - 1000;
+    }
+
+        @Override
+        public long getCurrentWatermark() {
+        return Long.MIN_VALUE;
+    }
     }
 
 

@@ -40,7 +40,7 @@ public class FlinkTumblingWindowFromKafka {
 
         // set up streaming execution environment
         StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
-        env.setStreamTimeCharacteristic(TimeCharacteristic.IngestionTime);
+        env.setStreamTimeCharacteristic(TimeCharacteristic.ProcessingTime);
         env.getConfig().setAutoWatermarkInterval(1000);
 
         // configure the Kafka consumer
@@ -57,7 +57,7 @@ public class FlinkTumblingWindowFromKafka {
                 new TaxiRideSchema(),
                 kafkaProps);
         // assign a timestamp extractor to the consumer
-        consumer.assignTimestampsAndWatermarks(new org.apache.flink.quickstart.FromKafka.TaxiRideTSExtractor());
+        consumer.assignTimestampsAndWatermarks(new FlinkTumblingWindowFromKafka.TaxiRideTSExtractor());
 
         // create a TaxiRide data stream
         DataStream<TaxiRide> rides = env.addSource(consumer);

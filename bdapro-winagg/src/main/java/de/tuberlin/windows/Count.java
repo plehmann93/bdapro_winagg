@@ -25,7 +25,7 @@ public class Count {
         final int countNumber = conf.getCountSize();         //size of elements in each window
         // set up streaming execution environment
         StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
-        env.setStreamTimeCharacteristic(TimeCharacteristic.EventTime);
+        env.setStreamTimeCharacteristic(TimeCharacteristic.ProcessingTime);
 
         // start the data generator
         DataStream<TaxiRide> rides = env.addSource(
@@ -33,7 +33,7 @@ public class Count {
 
         // find average number of passengers per minute starting a taxi ride
       //  DataStream<Tuple4<Double,Integer,String,String>> popularSpots = rides
-       DataStream<Tuple3<Double,String,Long>> popularSpots = rides
+       DataStream<Tuple3<Double,String,Long>> averagePassengers = rides
 
                 //filter out those events that are not starting
                 .filter(x->x.isStart)
@@ -53,10 +53,10 @@ public class Count {
 
 
         // print result on stdout
-        popularSpots.print();
+        averagePassengers.print();
 
         // execute the transformation pipeline
-        env.execute("Popular Places");
+        env.execute("Flink Count");
     }
 
 
