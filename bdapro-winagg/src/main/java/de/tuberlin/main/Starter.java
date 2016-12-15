@@ -38,6 +38,7 @@ public class Starter {
                 }
             }
         }else{
+            new SparkStream(conf);
             //TODO start Spark/Storm classes
         }
     }
