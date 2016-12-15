@@ -20,8 +20,10 @@ public class Conf {
  String localKafkaBroker;
  String groupId;
  String topicName;
+ String master;
  int fromKafka;
  int flink;
+ int batchsize;
     public int getWindowType() {
         return windowType;
     }
@@ -54,6 +56,10 @@ public class Conf {
 
     public int getFlink() {        return flink;    }
 
+    public int getBatchsize() {        return batchsize;    }
+
+    public String getMaster() {        return master;    }
+
     public Conf(){
 
     try {
@@ -69,8 +75,10 @@ public class Conf {
         localKafkaBroker= ini.get("kafka", "local_kafka_broker");
         groupId= ini.get("kafka", "group_id");
         topicName= ini.get("kafka", "topic_name");
+        master= ini.get("spark", "master");
         flink= ini.get("system", "flink", int.class);
         fromKafka= ini.get("system", "from_kafka", int.class);
+        batchsize= ini.get("spark", "batchsize", int.class);
 
     }catch (IOException e){
         e.printStackTrace();

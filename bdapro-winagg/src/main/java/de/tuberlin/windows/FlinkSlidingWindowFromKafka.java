@@ -39,8 +39,8 @@ public class FlinkSlidingWindowFromKafka {
 
         // set up streaming execution environment
         StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
-        env.setStreamTimeCharacteristic(TimeCharacteristic.EventTime);
-        env.getConfig().setAutoWatermarkInterval(1000);
+        env.setStreamTimeCharacteristic(TimeCharacteristic.ProcessingTime);
+       // env.getConfig().setAutoWatermarkInterval(1000);
 
         // configure the Kafka consumer
         Properties kafkaProps = new Properties();
@@ -56,7 +56,7 @@ public class FlinkSlidingWindowFromKafka {
                 new TaxiRideSchema(),
                 kafkaProps);
         // assign a timestamp extractor to the consumer
-        consumer.assignTimestampsAndWatermarks(new org.apache.flink.quickstart.FromKafka.TaxiRideTSExtractor());
+    //    consumer.assignTimestampsAndWatermarks(new org.apache.flink.quickstart.FromKafka.TaxiRideTSExtractor());
 
         // create a TaxiRide data stream
         DataStream<TaxiRide> rides = env.addSource(consumer);
@@ -76,7 +76,7 @@ public class FlinkSlidingWindowFromKafka {
                 .keyBy(0)
 
                 // sliding window
-                .timeWindow(Time.seconds(windowTime),Time.seconds(slidingTime))
+                .timeWindow(Time.milliseconds(windowTime),Time.milliseconds(slidingTime))
 
                 //sums the 1s and the passengers for the whole window
                 .reduce( new Aggregations.SumAllValues())

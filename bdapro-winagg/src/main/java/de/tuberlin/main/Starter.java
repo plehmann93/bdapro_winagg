@@ -38,7 +38,7 @@ public class Starter {
                 }
             }
         }else{
-            new SparkStream(conf);
+            new SparkWindowFromKafka(conf);
             //TODO start Spark/Storm classes
         }
     }

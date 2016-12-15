@@ -13,8 +13,8 @@ public class SparkTest {
     public static void main(String[] args) {
 
 
-        String path="C:\\Users\\Lehmann\\Documents\\Studium\\Informatik\\BigData\\hadoop\\winutils\\";
-        System.setProperty("hadoop.home.dir", path);
+     //   String path="C:\\Users\\Lehmann\\Documents\\Studium\\Informatik\\BigData\\hadoop\\winutils\\";
+      //  System.setProperty("hadoop.home.dir", path);
         // Example
         // winutils.exe is copied to C:\winutil\bin\
         // System.setProperty("hadoop.home.dir", "C:\\winutil\\");

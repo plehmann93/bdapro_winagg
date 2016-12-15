@@ -113,22 +113,46 @@ under the License.
 			<artifactId>spark-streaming_2.11</artifactId>
 			<version>2.0.2</version>
 		</dependency>
+        <!--
 		<dependency>
 			<groupId>org.apache.spark</groupId>
 			<artifactId>spark-streaming-kafka_2.10</artifactId>
 			<version>1.6.0</version>
 		</dependency>
+
+		-->
+
+        <dependency>
+            <groupId>org.apache.spark</groupId>
+            <artifactId>spark-streaming-kafka-0-8_2.11</artifactId>
+            <version>2.0.2</version>
+        </dependency>
+
+
 		<dependency>
 			<groupId>org.apache.hadoop</groupId>
 			<artifactId>hadoop-client</artifactId>
 			<version>2.7.1</version>
 		</dependency>
 
-	</dependencies>
+        <!--
+                <dependency>
+                    <groupId>org.scala-lang</groupId>
+                    <artifactId>scala-library</artifactId>
+                    <version>2.10.0</version>
+                </dependency>
 
-	<profiles>
-		<profile>
-			<!-- Profile for packaging correct JAR files -->
+                <dependency>
+                    <groupId>com.typesafe.akka</groupId>
+                    <artifactId>akka-actor_2.11</artifactId>
+                    <version>2.3.11</version>
+                </dependency>
+-->
+            </dependencies>
+
+            <profiles>
+                <profile>
+                    <!-- Profile for packaging correct JAR files -->
 			<id>build-jar</id>
 			<activation>
 				<activeByDefault>false</activeByDefault>
