@@ -22,6 +22,7 @@ public class SparkTest {
         String pathToTest="C:\\Users\\Lehmann\\Documents\\Studium\\Informatik\\BigData\\test.txt";
         SparkConf conf = new SparkConf().setAppName("Simple Application").setMaster("local");
         JavaSparkContext sc = new JavaSparkContext(conf);
+
         JavaRDD logData = sc.textFile(pathToTest).cache();
 
         long numAs = logData.filter(new Function<String, Boolean>() {

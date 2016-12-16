@@ -4,6 +4,7 @@ import org.joda.time.DateTime;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
 
+import java.io.Serializable;
 import java.util.Locale;
 
 /**
@@ -16,7 +17,7 @@ import org.joda.time.DateTime;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
 
-    public class TaxiRide {
+    public class TaxiRide implements Serializable{
         private static transient DateTimeFormatter timeFormatter;
         public long rideId;
         public boolean isStart;
@@ -63,12 +64,12 @@ import org.joda.time.format.DateTimeFormatter;
             return sb.toString();
         }
 
-        public static com.dataartisans.flinktraining.exercises.datastream_java.datatypes.TaxiRide fromString(String line) {
+        public static TaxiRide fromString(String line) {
             String[] tokens = line.split(",");
             if(tokens.length != 9) {
                 throw new RuntimeException("Invalid record: " + line);
             } else {
-                com.dataartisans.flinktraining.exercises.datastream_java.datatypes.TaxiRide ride = new com.dataartisans.flinktraining.exercises.datastream_java.datatypes.TaxiRide();
+               TaxiRide ride = new TaxiRide();
 
                 try {
                     ride.rideId = Long.parseLong(tokens[0]);
@@ -114,7 +115,7 @@ import org.joda.time.format.DateTimeFormatter;
         }
 
         public boolean equals(Object other) {
-            return other instanceof com.dataartisans.flinktraining.exercises.datastream_java.datatypes.TaxiRide && this.rideId == ((com.dataartisans.flinktraining.exercises.datastream_java.datatypes.TaxiRide)other).rideId;
+            return other instanceof TaxiRide && this.rideId == ((TaxiRide)other).rideId;
         }
 
         public int hashCode() {
