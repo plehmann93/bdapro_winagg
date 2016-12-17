@@ -24,6 +24,7 @@ public class Conf {
  int fromKafka;
  int flink;
  int batchsize;
+ int maxReceiverRate;
     public int getWindowType() {
         return windowType;
     }
@@ -60,6 +61,8 @@ public class Conf {
 
     public String getMaster() {        return master;    }
 
+    public int getMaxReceiverRate() {        return maxReceiverRate;    }
+
     public Conf(){
 
     try {
@@ -79,7 +82,7 @@ public class Conf {
         flink= ini.get("system", "flink", int.class);
         fromKafka= ini.get("system", "from_kafka", int.class);
         batchsize= ini.get("spark", "batchsize", int.class);
-
+        maxReceiverRate=ini.get("spark", "max_receiver_rate", int.class);
     }catch (IOException e){
         e.printStackTrace();
     }

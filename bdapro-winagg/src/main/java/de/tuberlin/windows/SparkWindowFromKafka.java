@@ -7,12 +7,15 @@ import de.tuberlin.io.TaxiClass;
 import de.tuberlin.source.TaxiRide;
 import kafka.serializer.DefaultDecoder;
 import kafka.serializer.StringDecoder;
+import org.apache.flink.api.java.tuple.Tuple2;
 import org.apache.flink.api.java.tuple.Tuple3;
 import org.apache.spark.SparkConf;
 import org.apache.spark.api.java.JavaSparkContext;
 import org.apache.spark.api.java.function.Function;
 import org.apache.spark.api.java.function.Function2;
 import org.apache.spark.streaming.Duration;
+import org.apache.spark.streaming.Time;
+import org.apache.spark.streaming.api.java.JavaDStream;
 import org.apache.spark.streaming.api.java.JavaPairInputDStream;
 import org.apache.spark.streaming.api.java.JavaStreamingContext;
 import org.apache.spark.streaming.kafka.KafkaUtils;
@@ -43,22 +46,29 @@ public class SparkWindowFromKafka {
         final int batchsize = conf.getBatchsize();         //size of elements in each window
         final int windowTime = conf.getWindowSize();          //measured in seconds
         final int slidingTime = conf.getWindowSlideSize();          //measured in seconds
-        final int partiotions = 1;
+        final int partitions = 1;
         final int multiplication_factor=1;
 
         Map<String,Integer> topicMap = new HashMap<>();
-        topicMap.put("winagg",partiotions);
+        topicMap.put("winagg",partitions);
 
-        SparkConf sparkConf = new SparkConf().setAppName(APPLICATION_NAME).setMaster(MASTER);
-        JavaSparkContext sc = new JavaSparkContext(sparkConf);
+        SparkConf sparkConf = new SparkConf()
+                .setAppName(APPLICATION_NAME)
+                .set("spark.streaming.receiver.maxRate",String.valueOf(conf.getMaxReceiverRate()))
+                .setMaster(MASTER);
+
+
+       JavaSparkContext sc = new JavaSparkContext(sparkConf);
         sc.setLogLevel("WARN");
         JavaStreamingContext jssc = new JavaStreamingContext(sc, new Duration(batchsize*multiplication_factor));
 
         Set<String> topics = Collections.singleton(TOPIC_NAME);
 
         Map<String, String>kafkaParams=new HashMap<>();
+        kafkaParams.setProperty("zookeeper.connect", LOCAL_ZOOKEEPER_HOST);
         kafkaParams.put("metadata.broker.list",LOCAL_KAFKA_BROKER);
         kafkaParams.put("auto.offset.reset","smallest");
+        kafkaParams.put("group.id",conf.getGroupId());
 
         JavaPairInputDStream<String,String> messages = KafkaUtils.createDirectStream(
                 jssc,
@@ -70,42 +80,31 @@ public class SparkWindowFromKafka {
                 topics
         );
 
-        messages
-                //.map(x -> x._2)
-                .map(x -> TaxiRide.fromString(x._2))
-                .map(x->new Tuple3<Integer,Integer,Long>(1,Integer.valueOf(x.passengerCnt),System.currentTimeMillis()))
-                .window(new Duration(windowTime*multiplication_factor),new Duration(slidingTime*multiplication_factor))
-                .reduce( (x,y)-> new Tuple3<Integer, Integer, Long>(x.f0+y.f0,x.f1+y.f1,x.f2<y.f2?y.f2:x.f2) )
-                .map(x->new Tuple3<Double, Integer, Long>(new Double(x.f1*1000/x.f0)/1000.0,x.f0,System.currentTimeMillis()-x.f2))
-                .print();
-                /*.map(x->new Tuple3<Integer,Integer,Long>(1,TaxiObject.getPassengerCnt(x._2),System.currentTimeMillis()))
-                .print();
-                .reduce(new Function2<Tuple3<Integer, Integer, Long>, Tuple3<Integer, Integer, Long>, Tuple3<Integer, Integer, Long>>() {
-                    @Override
-                    public Tuple3<Integer, Integer, Long> call(Tuple3<Integer, Integer, Long> t1, Tuple3<Integer, Integer, Long> t2)  throws Exception {
-                        Long ts=t2.f2;
-                        if(ts<t1.f2){
-                            ts=t1.f2;
-                        }
-                        return new Tuple3<Integer, Integer, Long>(t1.f0+t2.f0,t1.f1+t2.f1,ts);
-                    }
-                })
-                .print();
-                /*
+    /*    JavaDStream<Tuple3<Double, Integer, Long>> averagePassengers=messages
+               // .map(x -> TaxiRide.fromString(x._2))
+                .map(x->new Tuple3<Integer,Long,Long>(1,Long.valueOf(TaxiRide.fromString(x._2).passengerCnt),System.currentTimeMillis()))
 
-                .map(x-> new Tuple3<Double,Integer,Long>(new Double(x.f1*1000/x.f0)/1000.0,x.f1,x.f2))
-                .print();
-                */
-               /* .map(new Function<TaxiRide, Tuple3<Integer,Integer,Long>>() {
-                    @Override
-                    public Tuple3<Integer,Integer,Long> call(TaxiRide taxiRide) {
-                        Long time= System.currentTimeMillis();
-                        return new Tuple3<Integer,Integer,Long>(1,Integer.valueOf(taxiRide.passengerCnt),time);
-                    }
-                });
-                */
+                .reduceByWindow( (x,y)-> new Tuple3<Integer, Long, Long>(x.f0+y.f0,x.f1+y.f1,x.f2<y.f2?y.f2:x.f2)
+                        , new Duration(windowTime*multiplication_factor),new Duration(slidingTime*multiplication_factor))
+
+               // .window(new Duration(windowTime*multiplication_factor),new Duration(slidingTime*multiplication_factor))
+               // .reduce( (x,y)-> new Tuple3<Integer, Integer, Long>(x.f0+y.f0,x.f1+y.f1,x.f2<y.f2?y.f2:x.f2) )
+
+                .map(x->new Tuple3<Double, Integer, Long>(new Double(x.f1*1000/x.f0)/1000.0,x.f0,System.currentTimeMillis()-x.f2));
+
+        averagePassengers.print();
+*/
+    messages.window(new Duration(windowTime*multiplication_factor),new Duration(slidingTime*multiplication_factor))
+            .print();
+        //averagePassengers.writeAsCsv("src/main/resources/results/tumbling/"+String.valueOf(System.currentTimeMillis())+"/");
+        //String path="src/main/resources/results/spark/";
+        //String fileName=windowTime+"_"+slidingTime+"_"+String.valueOf(System.currentTimeMillis());
+        //String suffix="";
+        //averagePassengers.dstream().saveAsTextFiles(path+fileName,suffix);
                // .foreachRDD( (rdd,time)-> (rdd,time) );
 
+
+        //averagePassengers.writeAsCsv("src/main/resources/results/tumbling/"+String.valueOf(System.currentTimeMillis())+"/");
 
         jssc.start();
 
@@ -113,15 +112,6 @@ public class SparkWindowFromKafka {
 
     }
 
-    public static class TaxiObject implements Serializable{
-
-        public static int getPassengerCnt(String line){
-            String[] values=line.split(",");
-
-            int passengerCnt=Integer.valueOf(values[8]);
-            return passengerCnt;
-        }
-    }
 
 
 }

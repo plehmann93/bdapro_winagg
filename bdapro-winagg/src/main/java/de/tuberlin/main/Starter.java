@@ -12,6 +12,8 @@ public class Starter {
 
         Conf conf = new Conf();
         if (conf.getFlink() == 1) {
+            new FlinkWindowFromKafka(conf);
+            /*
             if (conf.getFromKafka() == 0) {
                 switch (conf.getWindowType()) {
                     case 1:
@@ -36,10 +38,11 @@ public class Starter {
                         new FlinkCountWindowFromKafka(conf);
                         break;
                 }
+
             }
+            */
         }else{
             new SparkWindowFromKafka(conf);
-            //TODO start Spark/Storm classes
         }
     }
 }

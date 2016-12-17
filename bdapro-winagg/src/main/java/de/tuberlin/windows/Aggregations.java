@@ -1,5 +1,6 @@
 package de.tuberlin.windows;
 
+
 import com.dataartisans.flinktraining.exercises.datastream_java.datatypes.TaxiRide;
 import org.apache.flink.api.common.functions.MapFunction;
 import org.apache.flink.api.common.functions.ReduceFunction;
@@ -28,6 +29,19 @@ public class Aggregations {
         @Override
         public Tuple3<Integer, Integer,Long> map(TaxiRide taxiRide) throws Exception {
             return new Tuple3<Integer,Integer,Long>(1, Integer.valueOf(taxiRide.passengerCnt),System.currentTimeMillis() );
+
+        }
+    }
+
+    /**
+     Maps Taxiride so just id of ride and passengercount stays
+     */
+    public static class MapPassenger implements MapFunction<String, Tuple3<Integer, Integer,Long>> {
+
+
+        @Override
+        public Tuple3<Integer, Integer,Long> map(String line) throws Exception {
+            return new Tuple3<Integer,Integer,Long>(1, Integer.valueOf(TaxiRide.fromString(line).passengerCnt),System.currentTimeMillis() );
 
         }
     }
@@ -62,24 +76,26 @@ public class Aggregations {
 
 
 
-   public static class TimeStamp implements TimestampExtractor<TaxiRide>
+
+    public static class TimeStamp implements TimestampExtractor<TaxiRide>
 
     {
         @Override
         public long extractTimestamp(TaxiRide element, long currentTimestamp) {
-        return currentTimestamp;
-    }
+            return currentTimestamp;
+        }
 
         @Override
         public long extractWatermark(TaxiRide element, long currentTimestamp) {
-        return currentTimestamp - 1000;
-    }
+            return currentTimestamp - 1000;
+        }
 
         @Override
         public long getCurrentWatermark() {
-        return Long.MIN_VALUE;
+            return Long.MIN_VALUE;
+        }
     }
-    }
+
 
 
     /**
