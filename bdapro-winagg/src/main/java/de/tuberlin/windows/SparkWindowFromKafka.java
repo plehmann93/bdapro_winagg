@@ -54,7 +54,8 @@ public class SparkWindowFromKafka {
 
         SparkConf sparkConf = new SparkConf()
                 .setAppName(APPLICATION_NAME)
-                .set("spark.streaming.receiver.maxRate",String.valueOf(conf.getMaxReceiverRate()))
+              //  .set("spark.streaming.receiver.maxRate",String.valueOf(conf.getMaxReceiverRate()))
+                .set("spark.streaming.kafka.maxRatePerPartition",String.valueOf(conf.getMaxReceiverRate()))
                 .setMaster(MASTER);
 
 
@@ -65,7 +66,7 @@ public class SparkWindowFromKafka {
         Set<String> topics = Collections.singleton(TOPIC_NAME);
 
         Map<String, String>kafkaParams=new HashMap<>();
-        kafkaParams.setProperty("zookeeper.connect", LOCAL_ZOOKEEPER_HOST);
+       // kafkaParams.put("zookeeper.connect", LOCAL_ZOOKEEPER_HOST);
         kafkaParams.put("metadata.broker.list",LOCAL_KAFKA_BROKER);
         kafkaParams.put("auto.offset.reset","smallest");
         kafkaParams.put("group.id",conf.getGroupId());
