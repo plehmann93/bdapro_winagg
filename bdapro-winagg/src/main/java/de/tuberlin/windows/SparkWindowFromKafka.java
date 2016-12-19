@@ -8,7 +8,8 @@ import de.tuberlin.source.TaxiRide;
 import kafka.serializer.DefaultDecoder;
 import kafka.serializer.StringDecoder;
 import org.apache.commons.collections.map.HashedMap;
-import org.apache.flink.api.java.tuple.Tuple2;
+import scala.Tuple2;
+
 import org.apache.flink.api.java.tuple.Tuple3;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.kafka.common.serialization.StringDeserializer;
@@ -32,12 +33,14 @@ import org.apache.spark.streaming.kafka010.*;
 import org.apache.spark.util.SystemClock;
 
 import java.io.Serializable;
+import java.math.BigInteger;
+import java.security.SecureRandom;
 import java.util.*;
 
 /**
  * Created by patrick on 15.12.16.
  */
-public class SparkWindowFromKafka {
+public class SparkWindowFromKafka implements Serializable{
 
     public SparkWindowFromKafka(Conf conf) throws Exception{
 
@@ -55,6 +58,7 @@ public class SparkWindowFromKafka {
         final int slidingTime = conf.getWindowSlideSize();          //measured in seconds
         final int partitions = 1;
         final int multiplication_factor=1;
+        final String id= new BigInteger(130,new SecureRandom()).toString(32);
 
         Map<String,Integer> topicMap = new HashMap<>();
         topicMap.put("winagg",partitions);
@@ -71,7 +75,7 @@ public class SparkWindowFromKafka {
         JavaStreamingContext jssc = new JavaStreamingContext(sc, new Duration(batchsize*multiplication_factor));
 
        // Set<String> topics = Collections.singleton(TOPIC_NAME);
-        Collection<String> topics=Arrays.asList(TOPIC_NAME);
+        Collection<String> topics=Arrays.asList(TOPIC_NAME,"win","winagg");
         //Collection<TopicPartition> topics=Arrays.asList(new TopicPartition[]{new TopicPartition(TOPIC_NAME,1)});
 
        // Map<String, String>kafkaParams=new HashMap<>();
@@ -80,7 +84,7 @@ public class SparkWindowFromKafka {
         //kafkaParams.put("metadata.broker.list",LOCAL_KAFKA_BROKER);
         kafkaParams.put("bootstrap.servers",LOCAL_KAFKA_BROKER);
         kafkaParams.put("auto.offset.reset","earliest");
-        kafkaParams.put("group.id",conf.getGroupId());
+        kafkaParams.put("group.id",id);
         kafkaParams.put("key.deserializer", StringDeserializer.class);
         kafkaParams.put("value.deserializer", StringDeserializer.class);
         //kafkaParams.put("auto.commit.enable","true");
@@ -106,8 +110,22 @@ public class SparkWindowFromKafka {
                // ConsumerStrategies.Assign(topics,kafkaParams)
                 ConsumerStrategies.<String,String>Subscribe(topics,kafkaParams)
         );
-        messages.print();
-/*
+       //System.out.println("jjj "+messages.count());
+        /*
+      messages.mapToPair(
+               new PairFunction<ConsumerRecord<String,String>, String, String>() {
+                @Override
+                public Tuple2<String,String> call(ConsumerRecord<String,String> record){
+                    return new Tuple2<>(record.key(),record.value());
+           }
+       })
+              .map(x-> x._2)
+
+              .print();
+
+
+
+*/
         JavaDStream<Tuple3<Double, Integer, Long>> averagePassengers=messages
                // .map(x -> TaxiRide.fromString(x._2))
                 .map(x->new Tuple3<Integer,Long,Long>(1,Long.valueOf(TaxiRide.fromString(x.value()).passengerCnt),System.currentTimeMillis()))
@@ -122,7 +140,7 @@ public class SparkWindowFromKafka {
 
         averagePassengers.print();
 
-*/
+
         //averagePassengers.writeAsCsv("src/main/resources/results/tumbling/"+String.valueOf(System.currentTimeMillis())+"/");
         //String path="src/main/resources/results/spark/";
         //String fileName=windowTime+"_"+slidingTime+"_"+String.valueOf(System.currentTimeMillis());

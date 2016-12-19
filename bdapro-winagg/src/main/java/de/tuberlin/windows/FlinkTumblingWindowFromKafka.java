@@ -57,7 +57,7 @@ public class FlinkTumblingWindowFromKafka {
                 new TaxiRideSchema(),
                 kafkaProps);
         // assign a timestamp extractor to the consumer
-        consumer.assignTimestampsAndWatermarks(new FlinkTumblingWindowFromKafka.TaxiRideTSExtractor());
+        //consumer.assignTimestampsAndWatermarks(new FlinkTumblingWindowFromKafka.TaxiRideTSExtractor());
 
         // create a TaxiRide data stream
         DataStream<TaxiRide> rides = env.addSource(consumer);

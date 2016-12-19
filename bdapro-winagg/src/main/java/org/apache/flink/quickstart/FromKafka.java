@@ -69,7 +69,7 @@ public class FromKafka {
                 new TaxiRideSchema(),
                 kafkaProps);
         // assign a timestamp extractor to the consumer
-        consumer.assignTimestampsAndWatermarks(new TaxiRideTSExtractor());
+        //consumer.assignTimestampsAndWatermarks(new TaxiRideTSExtractor());
 
         // create a TaxiRide data stream
         DataStream<TaxiRide> rides = env.addSource(consumer);
@@ -124,26 +124,7 @@ public class FromKafka {
         env.execute("Popular Places from Kafka");
     }
 
-    /**
-     * Assigns timestamps to TaxiRide records.
-     * Watermarks are a fixed time interval behind the max timestamp and are periodically emitted.
-     */
-    public static class TaxiRideTSExtractor extends BoundedOutOfOrdernessTimestampExtractor<TaxiRide> {
 
-        public TaxiRideTSExtractor() {
-            super(Time.seconds(MAX_EVENT_DELAY));
-        }
-
-        @Override
-        public long extractTimestamp(TaxiRide ride) {
-            if (ride.isStart) {
-                return ride.startTime.getMillis();
-            }
-            else {
-                return ride.endTime.getMillis();
-            }
-        }
-    }
 
     /**
      Maps Taxiride so just id of ride and passengercount stays

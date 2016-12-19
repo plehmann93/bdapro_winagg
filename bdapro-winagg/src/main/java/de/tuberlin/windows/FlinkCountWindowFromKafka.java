@@ -96,7 +96,7 @@ public class FlinkCountWindowFromKafka {
                 new TaxiRideSchema(),
                 kafkaProps);
         // assign a timestamp extractor to the consumer
-        consumer.assignTimestampsAndWatermarks(new org.apache.flink.quickstart.FromKafka.TaxiRideTSExtractor());
+       // consumer.assignTimestampsAndWatermarks(new org.apache.flink.quickstart.FromKafka.TaxiRideTSExtractor());
 
         // create a TaxiRide data stream
         DataStream<TaxiRide> rides = env.addSource(consumer);

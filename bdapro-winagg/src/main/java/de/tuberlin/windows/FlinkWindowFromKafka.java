@@ -11,9 +11,12 @@ import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 import org.apache.flink.streaming.api.functions.timestamps.BoundedOutOfOrdernessTimestampExtractor;
 import org.apache.flink.streaming.api.windowing.assigners.TumblingProcessingTimeWindows;
 import org.apache.flink.streaming.api.windowing.time.Time;
+import org.apache.flink.streaming.connectors.kafka.FlinkKafkaConsumer010;
 import org.apache.flink.streaming.connectors.kafka.FlinkKafkaConsumer09;
 import org.apache.flink.streaming.util.serialization.SimpleStringSchema;
 
+import java.math.BigInteger;
+import java.security.SecureRandom;
 import java.util.Properties;
 
 /**
@@ -36,7 +39,7 @@ public class FlinkWindowFromKafka {
         final int windowTime = conf.getWindowSize();          //measured in seconds
         final int slidingTime = conf.getWindowSlideSize();          //measured in seconds
         final int windowType = conf.getWindowType();
-
+        final String id= new BigInteger(130,new SecureRandom()).toString(32);
         // set up streaming execution environment
         StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
         env.setStreamTimeCharacteristic(TimeCharacteristic.ProcessingTime);
@@ -44,15 +47,20 @@ public class FlinkWindowFromKafka {
 
         // configure the Kafka consumer
         Properties kafkaProps = new Properties();
-        kafkaProps.setProperty("zookeeper.connect", LOCAL_ZOOKEEPER_HOST);
+        //kafkaProps.setProperty("zookeeper.connect", LOCAL_ZOOKEEPER_HOST);
         kafkaProps.setProperty("bootstrap.servers", LOCAL_KAFKA_BROKER);
-        kafkaProps.setProperty("group.id", GROUP_ID);
-        kafkaProps.setProperty("max.partition.fetch.bytes","1000");
+        kafkaProps.setProperty("group.id", id);
+
+        kafkaProps.setProperty("max.partition.fetch.bytes","2000");
         // always read the Kafka topic from the start
         kafkaProps.setProperty("auto.offset.reset", "earliest");
+        kafkaProps.setProperty("enable.auto.commit", "false");
+
+
+
 
         // create a Kafka consumer
-        FlinkKafkaConsumer09<String> consumer = new FlinkKafkaConsumer09<>(
+        FlinkKafkaConsumer09<String> consumer = new FlinkKafkaConsumer010<>(
                 TOPIC_NAME,
                 new SimpleStringSchema(),
                 kafkaProps);
