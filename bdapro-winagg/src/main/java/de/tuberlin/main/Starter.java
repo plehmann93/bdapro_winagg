@@ -9,10 +9,10 @@ import de.tuberlin.windows.*;
 public class Starter {
 
     public static void main(String[] args) throws Exception {
-
         Conf conf = new Conf();
         if (conf.getFlink() == 1) {
             new FlinkWindowFromKafka(conf);
+            System.out.println("4");
             /*
             if (conf.getFromKafka() == 0) {
                 switch (conf.getWindowType()) {

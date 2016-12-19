@@ -7,25 +7,32 @@ import de.tuberlin.io.TaxiClass;
 import de.tuberlin.source.TaxiRide;
 import kafka.serializer.DefaultDecoder;
 import kafka.serializer.StringDecoder;
+import org.apache.commons.collections.map.HashedMap;
 import org.apache.flink.api.java.tuple.Tuple2;
 import org.apache.flink.api.java.tuple.Tuple3;
+import org.apache.kafka.clients.consumer.ConsumerRecord;
+import org.apache.kafka.common.serialization.StringDeserializer;
+import org.apache.kafka.common.TopicPartition;
 import org.apache.spark.SparkConf;
+import org.apache.spark.TaskContext;
+import org.apache.spark.api.java.*;
+import org.apache.spark.api.java.function.*;
 import org.apache.spark.api.java.JavaSparkContext;
 import org.apache.spark.api.java.function.Function;
 import org.apache.spark.api.java.function.Function2;
 import org.apache.spark.streaming.Duration;
 import org.apache.spark.streaming.Time;
 import org.apache.spark.streaming.api.java.JavaDStream;
+import org.apache.spark.streaming.api.java.*;
+import org.apache.spark.streaming.api.java.JavaInputDStream;
 import org.apache.spark.streaming.api.java.JavaPairInputDStream;
 import org.apache.spark.streaming.api.java.JavaStreamingContext;
-import org.apache.spark.streaming.kafka.KafkaUtils;
+
+import org.apache.spark.streaming.kafka010.*;
 import org.apache.spark.util.SystemClock;
 
 import java.io.Serializable;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 /**
  * Created by patrick on 15.12.16.
@@ -55,7 +62,7 @@ public class SparkWindowFromKafka {
         SparkConf sparkConf = new SparkConf()
                 .setAppName(APPLICATION_NAME)
               //  .set("spark.streaming.receiver.maxRate",String.valueOf(conf.getMaxReceiverRate()))
-                .set("spark.streaming.kafka.maxRatePerPartition",String.valueOf(conf.getMaxReceiverRate()))
+               // .set("spark.streaming.kafka.maxRatePerPartition",String.valueOf(conf.getMaxReceiverRate()))
                 .setMaster(MASTER);
 
 
@@ -63,15 +70,26 @@ public class SparkWindowFromKafka {
         sc.setLogLevel("WARN");
         JavaStreamingContext jssc = new JavaStreamingContext(sc, new Duration(batchsize*multiplication_factor));
 
-        Set<String> topics = Collections.singleton(TOPIC_NAME);
+       // Set<String> topics = Collections.singleton(TOPIC_NAME);
+        Collection<String> topics=Arrays.asList(TOPIC_NAME);
+        //Collection<TopicPartition> topics=Arrays.asList(new TopicPartition[]{new TopicPartition(TOPIC_NAME,1)});
 
-        Map<String, String>kafkaParams=new HashMap<>();
+       // Map<String, String>kafkaParams=new HashMap<>();
+        Map<String,Object>kafkaParams=new HashMap<>();
        // kafkaParams.put("zookeeper.connect", LOCAL_ZOOKEEPER_HOST);
-        kafkaParams.put("metadata.broker.list",LOCAL_KAFKA_BROKER);
-        kafkaParams.put("auto.offset.reset","smallest");
+        //kafkaParams.put("metadata.broker.list",LOCAL_KAFKA_BROKER);
+        kafkaParams.put("bootstrap.servers",LOCAL_KAFKA_BROKER);
+        kafkaParams.put("auto.offset.reset","earliest");
         kafkaParams.put("group.id",conf.getGroupId());
+        kafkaParams.put("key.deserializer", StringDeserializer.class);
+        kafkaParams.put("value.deserializer", StringDeserializer.class);
+        //kafkaParams.put("auto.commit.enable","true");
+        //kafkaParams.put("auto.commit.interval.ms","1000");
+        //kafkaParams.put("max.partition.fetch.bytes","1000");
+        //kafkaParams.put("fetch.message.max.bytes","1024");
+        //kafkaParams.put("consumer.timeout.ms","1000");
 
-        JavaPairInputDStream<String,String> messages = KafkaUtils.createDirectStream(
+    /*    JavaPairInputDStream<String,String> messages = KafkaUtils.createDirectStream(
                 jssc,
                 String.class,
                 String.class,
@@ -80,10 +98,19 @@ public class SparkWindowFromKafka {
                 kafkaParams,
                 topics
         );
+*/
 
-    /*    JavaDStream<Tuple3<Double, Integer, Long>> averagePassengers=messages
+        final JavaInputDStream<ConsumerRecord<String,String>> messages = KafkaUtils.createDirectStream(
+                jssc,
+                LocationStrategies.PreferBrokers(),
+               // ConsumerStrategies.Assign(topics,kafkaParams)
+                ConsumerStrategies.<String,String>Subscribe(topics,kafkaParams)
+        );
+        messages.print();
+/*
+        JavaDStream<Tuple3<Double, Integer, Long>> averagePassengers=messages
                // .map(x -> TaxiRide.fromString(x._2))
-                .map(x->new Tuple3<Integer,Long,Long>(1,Long.valueOf(TaxiRide.fromString(x._2).passengerCnt),System.currentTimeMillis()))
+                .map(x->new Tuple3<Integer,Long,Long>(1,Long.valueOf(TaxiRide.fromString(x.value()).passengerCnt),System.currentTimeMillis()))
 
                 .reduceByWindow( (x,y)-> new Tuple3<Integer, Long, Long>(x.f0+y.f0,x.f1+y.f1,x.f2<y.f2?y.f2:x.f2)
                         , new Duration(windowTime*multiplication_factor),new Duration(slidingTime*multiplication_factor))
@@ -94,9 +121,8 @@ public class SparkWindowFromKafka {
                 .map(x->new Tuple3<Double, Integer, Long>(new Double(x.f1*1000/x.f0)/1000.0,x.f0,System.currentTimeMillis()-x.f2));
 
         averagePassengers.print();
+
 */
-    messages.window(new Duration(windowTime*multiplication_factor),new Duration(slidingTime*multiplication_factor))
-            .print();
         //averagePassengers.writeAsCsv("src/main/resources/results/tumbling/"+String.valueOf(System.currentTimeMillis())+"/");
         //String path="src/main/resources/results/spark/";
         //String fileName=windowTime+"_"+slidingTime+"_"+String.valueOf(System.currentTimeMillis());

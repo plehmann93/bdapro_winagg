@@ -47,6 +47,7 @@ public class FlinkWindowFromKafka {
         kafkaProps.setProperty("zookeeper.connect", LOCAL_ZOOKEEPER_HOST);
         kafkaProps.setProperty("bootstrap.servers", LOCAL_KAFKA_BROKER);
         kafkaProps.setProperty("group.id", GROUP_ID);
+        kafkaProps.setProperty("max.partition.fetch.bytes","1000");
         // always read the Kafka topic from the start
         kafkaProps.setProperty("auto.offset.reset", "earliest");
 
