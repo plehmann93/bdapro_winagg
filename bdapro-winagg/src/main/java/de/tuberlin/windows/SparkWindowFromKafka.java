@@ -8,6 +8,7 @@ import de.tuberlin.source.TaxiRide;
 import kafka.serializer.DefaultDecoder;
 import kafka.serializer.StringDecoder;
 import org.apache.commons.collections.map.HashedMap;
+import org.apache.kafka.clients.consumer.Consumer;
 import scala.Tuple2;
 
 import org.apache.flink.api.java.tuple.Tuple3;
@@ -31,10 +32,12 @@ import org.apache.spark.streaming.api.java.JavaStreamingContext;
 
 import org.apache.spark.streaming.kafka010.*;
 import org.apache.spark.util.SystemClock;
+import scala.Tuple4;
 
 import java.io.Serializable;
 import java.math.BigInteger;
 import java.security.SecureRandom;
+import java.text.SimpleDateFormat;
 import java.util.*;
 
 /**
@@ -66,7 +69,9 @@ public class SparkWindowFromKafka implements Serializable{
         SparkConf sparkConf = new SparkConf()
                 .setAppName(APPLICATION_NAME)
               //  .set("spark.streaming.receiver.maxRate",String.valueOf(conf.getMaxReceiverRate()))
-               // .set("spark.streaming.kafka.maxRatePerPartition",String.valueOf(conf.getMaxReceiverRate()))
+                .set("spark.streaming.kafka.maxRatePerPartition",String.valueOf(conf.getMaxReceiverRate()))
+                .set("spark.streaming.backpressure.enabled","true")
+                .set("spark.streaming.backpressure.initialRate","1000")
                 .setMaster(MASTER);
 
 
@@ -84,12 +89,17 @@ public class SparkWindowFromKafka implements Serializable{
         //kafkaParams.put("metadata.broker.list",LOCAL_KAFKA_BROKER);
         kafkaParams.put("bootstrap.servers",LOCAL_KAFKA_BROKER);
         kafkaParams.put("auto.offset.reset","earliest");
+        kafkaParams.put("enable.auto.commit","false");
         kafkaParams.put("group.id",id);
         kafkaParams.put("key.deserializer", StringDeserializer.class);
         kafkaParams.put("value.deserializer", StringDeserializer.class);
         //kafkaParams.put("auto.commit.enable","true");
         //kafkaParams.put("auto.commit.interval.ms","1000");
-        //kafkaParams.put("max.partition.fetch.bytes","1000");
+        kafkaParams.put("max.partition.fetch.bytes","1000");
+        kafkaParams.put("max.fetch.bytes","1000");
+        kafkaParams.put("fetch.max.bytes","1024");
+        kafkaParams.put("max.message.bytes","1024");
+        kafkaParams.put("message.max.bytes","1024");
         //kafkaParams.put("fetch.message.max.bytes","1024");
         //kafkaParams.put("consumer.timeout.ms","1000");
 
@@ -126,35 +136,57 @@ public class SparkWindowFromKafka implements Serializable{
 
 
 */
-        JavaDStream<Tuple3<Double, Integer, Long>> averagePassengers=messages
+        SimpleDateFormat sdf=new SimpleDateFormat("MM/dd/yyyy h:mm:ss a");
+        sdf.setTimeZone(TimeZone.getTimeZone("GMT"));
+
+       // messages.map(x->x.)
+
+       JavaDStream<Tuple2<String,Time>> messagesTs= messages.transform(new Function2<JavaRDD<ConsumerRecord<String, String>>, Time, JavaRDD<Tuple2<String,Time>> >() {
+            @Override
+            public JavaRDD<Tuple2<String,Time>> call(JavaRDD<ConsumerRecord<String, String>> record, Time time) throws Exception {
+                                return record.map( (x->new Tuple2<String, Time>(x.value(),time)));
+            }
+        });
+
+/*
+*/
+
+        JavaDStream<Tuple4<Double, Integer, Long,Long>> averagePassengers=messagesTs
                // .map(x -> TaxiRide.fromString(x._2))
-                .map(x->new Tuple3<Integer,Long,Long>(1,Long.valueOf(TaxiRide.fromString(x.value()).passengerCnt),System.currentTimeMillis()))
+                .map(x->new Tuple3<Integer,Long,Long>(1,Long.valueOf(TaxiRide.fromString(x._1).passengerCnt),x._2.milliseconds()))
+                //.map(x->new Tuple3<Integer,Long,Long>(1,Long.valueOf(TaxiRide.fromString(x.value()).passengerCnt),System.currentTimeMillis()))
+
 
                 .reduceByWindow( (x,y)-> new Tuple3<Integer, Long, Long>(x.f0+y.f0,x.f1+y.f1,x.f2<y.f2?y.f2:x.f2)
                         , new Duration(windowTime*multiplication_factor),new Duration(slidingTime*multiplication_factor))
 
-               // .window(new Duration(windowTime*multiplication_factor),new Duration(slidingTime*multiplication_factor))
-               // .reduce( (x,y)-> new Tuple3<Integer, Integer, Long>(x.f0+y.f0,x.f1+y.f1,x.f2<y.f2?y.f2:x.f2) )
+              //  .window(new Duration(windowTime*multiplication_factor),new Duration(slidingTime*multiplication_factor))
+              //  .reduce( (x,y)-> new Tuple3<Integer, Long, Long>(x.f0+y.f0,x.f1+y.f1,x.f2<y.f2?y.f2:x.f2) )
 
-                .map(x->new Tuple3<Double, Integer, Long>(new Double(x.f1*1000/x.f0)/1000.0,x.f0,System.currentTimeMillis()-x.f2));
+                .map(x->new Tuple4<Double, Integer, Long,Long>(new Double(x.f1*1000/x.f0)/1000.0,x.f0,System.currentTimeMillis()-x.f2,x.f2));
+
 
         averagePassengers.print();
 
 
+
+/*
         //averagePassengers.writeAsCsv("src/main/resources/results/tumbling/"+String.valueOf(System.currentTimeMillis())+"/");
-        //String path="src/main/resources/results/spark/";
-        //String fileName=windowTime+"_"+slidingTime+"_"+String.valueOf(System.currentTimeMillis());
-        //String suffix="";
-        //averagePassengers.dstream().saveAsTextFiles(path+fileName,suffix);
+        String path="src/main/resources/results/spark/";
+        String fileName=windowTime+"/"+slidingTime+"/"+String.valueOf(System.currentTimeMillis());
+        String suffix="";
+        averagePassengers.dstream().saveAsTextFiles(path+fileName,suffix);
+        ;
                // .foreachRDD( (rdd,time)-> (rdd,time) );
 
-
+*/
         //averagePassengers.writeAsCsv("src/main/resources/results/tumbling/"+String.valueOf(System.currentTimeMillis())+"/");
 
         jssc.start();
 
         jssc.awaitTermination();
-
+       // jssc.awaitTerminationOrTimeout(20000);
+        jssc.stop();
     }
 
 

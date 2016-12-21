@@ -31,6 +31,7 @@ under the License.
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<flink.version>1.2-SNAPSHOT</flink.version>
+		<spark.version>2.0.2</spark.version>
 	</properties>
 
 	<repositories>
@@ -113,12 +114,12 @@ under the License.
             <dependency>
                 <groupId>org.apache.spark</groupId>
                 <artifactId>spark-core_2.11</artifactId>
-                <version>2.0.2</version>
+                <version>${spark.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.apache.spark</groupId>
                 <artifactId>spark-streaming_2.11</artifactId>
-                <version>2.0.2</version>
+                <version>${spark.version}</version>
             </dependency>
             <!--
                     <dependency>
@@ -138,7 +139,7 @@ under the License.
                         <dependency>
                             <groupId>org.apache.spark</groupId>
                             <artifactId>spark-streaming-kafka-0-10_2.11</artifactId>
-                            <version>2.0.2</version>
+                            <version>${spark.version}</version>
                         </dependency>
 
 
@@ -206,18 +207,18 @@ under the License.
                 <dependency>
                     <groupId>org.apache.spark</groupId>
                     <artifactId>spark-core_2.11</artifactId>
-                    <version>2.0.2</version>
+                    <version>${spark.version}</version>
                 </dependency>
                 <dependency>
                     <groupId>org.apache.spark</groupId>
                     <artifactId>spark-streaming_2.11</artifactId>
-                    <version>2.0.2</version>
+                    <version>${spark.version}</version>
                 </dependency>
 
 				<dependency>
 					<groupId>org.apache.spark</groupId>
 					<artifactId>spark-streaming-kafka-0-10_2.11</artifactId>
-					<version>2.0.2</version>
+					<version>${spark.version}</version>
 				</dependency>
 
 

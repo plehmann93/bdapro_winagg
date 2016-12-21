@@ -10,7 +10,10 @@ import org.apache.flink.api.java.tuple.Tuple3;
 import org.apache.flink.api.java.tuple.Tuple4;
 import org.apache.flink.streaming.api.functions.TimestampExtractor;
 import org.apache.flink.streaming.api.functions.windowing.WindowFunction;
+import org.apache.flink.streaming.api.operators.TimestampedCollector;
 import org.apache.flink.streaming.api.windowing.windows.TimeWindow;
+import org.apache.flink.streaming.runtime.streamrecord.StreamRecord;
+import org.apache.flink.streaming.runtime.tasks.ProcessingTimeCallback;
 import org.apache.flink.util.Collector;
 
 import java.util.Date;
@@ -41,6 +44,7 @@ public class Aggregations {
 
         @Override
         public Tuple3<Integer, Integer,Long> map(String line) throws Exception {
+
             return new Tuple3<Integer,Integer,Long>(1, Integer.valueOf(TaxiRide.fromString(line).passengerCnt),System.currentTimeMillis() );
 
         }
@@ -63,6 +67,23 @@ public class Aggregations {
         }
     }
 
+    /**
+     Maps Taxiride so just id of ride and passengercount stays
+     */
+    public static class MapToMean2 implements MapFunction< Tuple3<Integer, Integer,Long> , Tuple3<Double, Double,Long>> {
+
+
+        public Tuple3<Double, Double,Long> map( Tuple3<Integer, Integer,Long> t) throws Exception {
+            Long millis=System.currentTimeMillis();
+            String timeStamp = new Date(millis).toString();
+            Long duration=millis-t.f2;
+
+            return new Tuple3<Double,Double,Long>(Math.round(t.f1/new Double(t.f0)*1000)/1000.0,Double.valueOf(t.f0), millis);
+
+        }
+    }
+
+
     public static class SumAllValues implements ReduceFunction<Tuple3<Integer, Integer,Long>> {
         @Override
         public Tuple3<Integer, Integer,Long> reduce(Tuple3<Integer, Integer,Long> value1, Tuple3<Integer, Integer,Long> value2) throws Exception {
@@ -73,6 +94,8 @@ public class Aggregations {
             return new Tuple3<Integer, Integer,Long>(value1.f0+value2.f0, value1.f1+value2.f1,time);
         }
     }
+
+
 
 
 
@@ -96,6 +119,38 @@ public class Aggregations {
         }
     }
 
+    /**
+     * Returns the average number of passengers in a specific time window
+     */
+    public static class TSExtractor implements WindowFunction<
+            Tuple3<Double, Double,Long>, // input type
+            Tuple3<Double,String,Long>, // output type
+            Tuple, // key type
+            TimeWindow> // window type
+    {
+
+        @SuppressWarnings("unchecked")
+        @Override
+        public void apply(
+                Tuple key,
+                TimeWindow window,
+                Iterable<Tuple3<Double, Double,Long>> values,
+                Collector<Tuple3<Double,String,Long>> out) throws Exception {
+
+            Double cnt = 0.0;
+            Double mean = 0.0;
+            Long ts=0L;
+            for(Tuple3<Double, Double,Long> v : values) {
+                mean = Double.valueOf(v.f0);
+                cnt = Double.valueOf(v.f1);
+                ts =Long.valueOf(v.f2);
+
+            }
+
+            Long duration= ts-window.maxTimestamp();
+            out.collect(new Tuple3<Double,String,Long>(mean,String.valueOf(cnt),duration ));
+        }
+    }
 
 
     /**

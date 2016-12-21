@@ -3,18 +3,30 @@ package de.tuberlin.windows;
 import com.dataartisans.flinktraining.exercises.datastream_java.datatypes.TaxiRide;
 import com.dataartisans.flinktraining.exercises.datastream_java.utils.TaxiRideSchema;
 import de.tuberlin.io.Conf;
+import org.apache.flink.api.java.tuple.Tuple;
 import org.apache.flink.api.java.tuple.Tuple3;
 import org.apache.flink.hadoop.shaded.org.jboss.netty.handler.codec.string.StringDecoder;
 import org.apache.flink.streaming.api.TimeCharacteristic;
 import org.apache.flink.streaming.api.datastream.DataStream;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
+import org.apache.flink.streaming.api.functions.AssignerWithPeriodicWatermarks;
 import org.apache.flink.streaming.api.functions.timestamps.BoundedOutOfOrdernessTimestampExtractor;
+import org.apache.flink.streaming.api.functions.windowing.WindowFunction;
+import org.apache.flink.streaming.api.watermark.Watermark;
+import org.apache.flink.streaming.api.windowing.assigners.SlidingProcessingTimeWindows;
 import org.apache.flink.streaming.api.windowing.assigners.TumblingProcessingTimeWindows;
 import org.apache.flink.streaming.api.windowing.time.Time;
+import org.apache.flink.streaming.api.windowing.windows.TimeWindow;
 import org.apache.flink.streaming.connectors.kafka.FlinkKafkaConsumer010;
 import org.apache.flink.streaming.connectors.kafka.FlinkKafkaConsumer09;
+import org.apache.flink.streaming.runtime.streamrecord.StreamRecord;
+import org.apache.flink.streaming.runtime.tasks.ProcessingTimeService;
 import org.apache.flink.streaming.util.serialization.SimpleStringSchema;
+import org.apache.kafka.clients.consumer.Consumer;
+import org.apache.kafka.clients.consumer.ConsumerRecord;
+import org.glassfish.jersey.server.monitoring.TimeWindowStatistics;
 
+import javax.annotation.Nullable;
 import java.math.BigInteger;
 import java.security.SecureRandom;
 import java.util.Properties;
@@ -43,6 +55,9 @@ public class FlinkWindowFromKafka {
         // set up streaming execution environment
         StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
         env.setStreamTimeCharacteristic(TimeCharacteristic.ProcessingTime);
+
+        //enable latency tracking
+env.getConfig().setLatencyTrackingInterval(2000);
         // env.getConfig().setAutoWatermarkInterval(1000);
 
         // configure the Kafka consumer
@@ -51,7 +66,7 @@ public class FlinkWindowFromKafka {
         kafkaProps.setProperty("bootstrap.servers", LOCAL_KAFKA_BROKER);
         kafkaProps.setProperty("group.id", id);
 
-        kafkaProps.setProperty("max.partition.fetch.bytes","2000");
+        kafkaProps.setProperty("max.partition.fetch.bytes","1000");
         // always read the Kafka topic from the start
         kafkaProps.setProperty("auto.offset.reset", "earliest");
         kafkaProps.setProperty("enable.auto.commit", "false");
@@ -60,17 +75,19 @@ public class FlinkWindowFromKafka {
 
 
         // create a Kafka consumer
-        FlinkKafkaConsumer09<String> consumer = new FlinkKafkaConsumer010<>(
+        FlinkKafkaConsumer010<String> consumer = new FlinkKafkaConsumer010<>(
                 TOPIC_NAME,
                 new SimpleStringSchema(),
                 kafkaProps);
         // assign a timestamp extractor to the consumer
         //    consumer.assignTimestampsAndWatermarks(new org.apache.flink.quickstart.FromKafka.TaxiRideTSExtractor());
-
+        //consumer.getIterationRuntimeContext()
         // create a TaxiRide data stream
         DataStream<String> rides = env.addSource(consumer);
+      //  rides.getTransformation().getOutputType().
 
-
+        //StreamRecord r=new StreamRecord();
+        //r.getTimestamp():
         // find average number of passengers per minute starting a taxi ride
         DataStream<Tuple3<Double, String, Long>> averagePassengers = rides
 
@@ -79,27 +96,39 @@ public class FlinkWindowFromKafka {
                // .filter(x -> x.isStart)
 
                 //just keep important variables
-                //.map(x->new Tuple3<Integer,Integer,Long>(1,Integer.valueOf(de.tuberlin.source.TaxiRide.fromString(x).passengerCnt),System.currentTimeMillis()))
+
 
                 .map(new Aggregations.MapPassenger())
                 //grouping all values
+
                 .keyBy(0)
                 //alternative no keyby , but timeWindowAll
+
                 // sliding window
                 .timeWindow(Time.milliseconds(windowTime), Time.milliseconds(slidingTime))
-                //.timeWindowAll(Time.milliseconds(windowTime), Time.milliseconds(slidingTime))
+
+                //.timeWindowAll(Time.milliseconds(windowTime), Time.milliseconds(slidingTime)
 
                 //sums the 1s and the passengers for the whole window
                 .reduce(new Aggregations.SumAllValues())
-                //.reduce( (x,y)->new Tuple3<Integer, Integer, Long>(x.f0+y.f0,x.f1+y.f1,x.f2<y.f2?y.f2:x.f2))
-                .map(new Aggregations.MapToMean());
-               // .map(x->new Tuple3<Double, String, Long>(new Double(x.f1*1000/x.f0)/1000.0,String.valueOf(x.f0),System.currentTimeMillis()-x.f2));
+
+                .map(new Aggregations.MapToMean())
+                //.map(new Aggregations.MapToMean2())
+                //.keyBy(0)
+                //.timeWindow(Time.milliseconds(windowTime), Time.milliseconds(slidingTime))
+                //.apply(new Aggregations.TSExtractor())
+                ;
+
 
 
         // print result on stdout
         averagePassengers.print();
 
-        //averagePassengers.writeAsCsv("src/main/resources/results/tumbling/"+String.valueOf(System.currentTimeMillis())+"/");
+        String filePath="src/main/resources/results/flink/"+windowTime+"/"+slidingTime+"/"+String.valueOf(System.currentTimeMillis())+"";
+        averagePassengers.writeAsText(filePath);
+
+
+     //   averagePassengers.writeAsCsv(filePath);
 
         // execute the transformation pipeline
         env.execute("Windowed Aggregation from Kafka with Flink");
