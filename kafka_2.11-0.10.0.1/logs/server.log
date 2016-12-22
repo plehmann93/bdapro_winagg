@@ -1,1 +1,7 @@
-[2016-12-22 00:00:29,518] INFO [Group Metadata Manager on Broker 0]: Removed 0 expired offsets in 0 milliseconds. (kafka.coordinator.GroupMetadataManager)
+[2016-12-22 19:06:27,326] INFO [Group Metadata Manager on Broker 0]: Removed 0 expired offsets in 0 milliseconds. (kafka.coordinator.GroupMetadataManager)
+[2016-12-22 19:06:36,931] INFO [GroupCoordinator 0]: Preparing to restabilize group winagg with old generation 0 (kafka.coordinator.GroupCoordinator)
+[2016-12-22 19:06:36,931] INFO [GroupCoordinator 0]: Stabilized group winagg generation 1 (kafka.coordinator.GroupCoordinator)
+[2016-12-22 19:06:36,935] INFO [GroupCoordinator 0]: Assignment received from leader for group winagg for generation 1 (kafka.coordinator.GroupCoordinator)
+[2016-12-22 19:06:54,136] INFO [GroupCoordinator 0]: Preparing to restabilize group winagg with old generation 1 (kafka.coordinator.GroupCoordinator)
+[2016-12-22 19:06:54,136] INFO [GroupCoordinator 0]: Group winagg generation 1 is dead and removed (kafka.coordinator.GroupCoordinator)
+[2016-12-22 19:16:27,327] INFO [Group Metadata Manager on Broker 0]: Removed 0 expired offsets in 0 milliseconds. (kafka.coordinator.GroupMetadataManager)

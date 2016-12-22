@@ -25,6 +25,11 @@ public class Conf {
  int flink;
  int batchsize;
  int maxReceiverRate;
+ int kafkaProducer;
+ int newOffset;
+ int workload;
+ int numberRecords;
+ String filepath;
     public int getWindowType() {
         return windowType;
     }
@@ -63,6 +68,16 @@ public class Conf {
 
     public int getMaxReceiverRate() {        return maxReceiverRate;    }
 
+    public int getKafkaProducer() {        return kafkaProducer;    }
+
+    public int getNewOffset() {        return newOffset;    }
+
+    public int getWorkload() {        return workload;    }
+
+    public String getFilepath() {        return filepath;    }
+
+    public int getNumberRecords() {        return numberRecords;    }
+
     public Conf(){
 
     try {
@@ -79,10 +94,15 @@ public class Conf {
         groupId= ini.get("kafka", "group_id");
         topicName= ini.get("kafka", "topic_name");
         master= ini.get("spark", "master");
+        filepath= ini.get("kafka", "filepath");
         flink= ini.get("system", "flink", int.class);
         fromKafka= ini.get("system", "from_kafka", int.class);
         batchsize= ini.get("spark", "batchsize", int.class);
         maxReceiverRate=ini.get("spark", "max_receiver_rate", int.class);
+        kafkaProducer=ini.get("system", "kafka_producer", int.class);
+        newOffset=ini.get("kafka", "new_offset", int.class);
+        workload =ini.get("kafka", "workload", int.class);
+        numberRecords =ini.get("kafka", "number_records", int.class);
     }catch (IOException e){
         e.printStackTrace();
     }

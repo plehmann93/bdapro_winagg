@@ -11,7 +11,10 @@ public class Starter {
 
     public static void main(String[] args) throws Exception {
         Conf conf = new Conf();
-       // new KafkaProducer().writeToKafka(conf); //for writing into kafka
+        if (conf.getKafkaProducer()==1){
+            (new KafkaProducer(conf)).start(); //for writing into kafka
+        }
+
         if (conf.getFlink() == 1) {
             new FlinkWindowFromKafka(conf);
 

@@ -4,10 +4,7 @@ package de.tuberlin.windows;
 import com.dataartisans.flinktraining.exercises.datastream_java.datatypes.TaxiRide;
 import org.apache.flink.api.common.functions.MapFunction;
 import org.apache.flink.api.common.functions.ReduceFunction;
-import org.apache.flink.api.java.tuple.Tuple;
-import org.apache.flink.api.java.tuple.Tuple2;
-import org.apache.flink.api.java.tuple.Tuple3;
-import org.apache.flink.api.java.tuple.Tuple4;
+import org.apache.flink.api.java.tuple.*;
 import org.apache.flink.streaming.api.functions.TimestampExtractor;
 import org.apache.flink.streaming.api.functions.windowing.WindowFunction;
 import org.apache.flink.streaming.api.operators.TimestampedCollector;
@@ -123,8 +120,8 @@ public class Aggregations {
      * Returns the average number of passengers in a specific time window
      */
     public static class TSExtractor implements WindowFunction<
-            Tuple3<Double, Double,Long>, // input type
-            Tuple3<Double,String,Long>, // output type
+            Tuple3<Integer, Integer,Long>, // input type
+            Tuple5<Double,String,Long,Long,Long>, // output type
             Tuple, // key type
             TimeWindow> // window type
     {
@@ -134,21 +131,17 @@ public class Aggregations {
         public void apply(
                 Tuple key,
                 TimeWindow window,
-                Iterable<Tuple3<Double, Double,Long>> values,
-                Collector<Tuple3<Double,String,Long>> out) throws Exception {
+                Iterable<Tuple3<Integer, Integer,Long>> values,
+                Collector<Tuple5<Double,String,Long,Long,Long>> out) throws Exception {
 
             Double cnt = 0.0;
             Double mean = 0.0;
             Long ts=0L;
-            for(Tuple3<Double, Double,Long> v : values) {
-                mean = Double.valueOf(v.f0);
-                cnt = Double.valueOf(v.f1);
-                ts =Long.valueOf(v.f2);
-
-            }
-
+            Tuple3<Integer, Integer,Long> value=values.iterator().next();
+            mean= Math.round(value.f1*1000.0/value.f0)/1000.0;
+            Long millis=System.currentTimeMillis();
             Long duration= ts-window.maxTimestamp();
-            out.collect(new Tuple3<Double,String,Long>(mean,String.valueOf(cnt),duration ));
+            out.collect(new Tuple5<Double,String,Long,Long,Long>(mean,String.valueOf(value.f0),millis , value.f2,window.getEnd()));
         }
     }
 

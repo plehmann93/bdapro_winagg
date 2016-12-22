@@ -5,6 +5,7 @@ import com.dataartisans.flinktraining.exercises.datastream_java.utils.TaxiRideSc
 import de.tuberlin.io.Conf;
 import org.apache.flink.api.java.tuple.Tuple;
 import org.apache.flink.api.java.tuple.Tuple3;
+import org.apache.flink.api.java.tuple.Tuple5;
 import org.apache.flink.hadoop.shaded.org.jboss.netty.handler.codec.string.StringDecoder;
 import org.apache.flink.streaming.api.TimeCharacteristic;
 import org.apache.flink.streaming.api.datastream.DataStream;
@@ -64,9 +65,14 @@ env.getConfig().setLatencyTrackingInterval(2000);
         Properties kafkaProps = new Properties();
         //kafkaProps.setProperty("zookeeper.connect", LOCAL_ZOOKEEPER_HOST);
         kafkaProps.setProperty("bootstrap.servers", LOCAL_KAFKA_BROKER);
-        kafkaProps.setProperty("group.id", id);
+        if(conf.getNewOffset()==1){  kafkaProps.setProperty("group.id", id);}else{
+            kafkaProps.setProperty("group.id", conf.getGroupId());
+        }
 
-        kafkaProps.setProperty("max.partition.fetch.bytes","1000");
+       // kafkaProps.setProperty("max.partition.fetch.bytes","200");
+        //kafkaProps.setProperty("fetch.max.bytes","200");
+        //kafkaProps.setProperty("receive.buffer.bytes","250");
+        //kafkaProps.setProperty("max.poll.records","500");
         // always read the Kafka topic from the start
         kafkaProps.setProperty("auto.offset.reset", "earliest");
         kafkaProps.setProperty("enable.auto.commit", "false");
@@ -89,7 +95,7 @@ env.getConfig().setLatencyTrackingInterval(2000);
         //StreamRecord r=new StreamRecord();
         //r.getTimestamp():
         // find average number of passengers per minute starting a taxi ride
-        DataStream<Tuple3<Double, String, Long>> averagePassengers = rides
+        DataStream<Tuple5<Double, String, Long,Long,Long>> averagePassengers = rides
 
                 //filter out those events that are not starting
 
@@ -110,13 +116,14 @@ env.getConfig().setLatencyTrackingInterval(2000);
                 //.timeWindowAll(Time.milliseconds(windowTime), Time.milliseconds(slidingTime)
 
                 //sums the 1s and the passengers for the whole window
-                .reduce(new Aggregations.SumAllValues())
+                .reduce(new Aggregations.SumAllValues(),new Aggregations.TSExtractor())
 
-                .map(new Aggregations.MapToMean())
-                //.map(new Aggregations.MapToMean2())
-                //.keyBy(0)
-                //.timeWindow(Time.milliseconds(windowTime), Time.milliseconds(slidingTime))
-                //.apply(new Aggregations.TSExtractor())
+                //.map(new Aggregations.MapToMean())
+             //   .map(new Aggregations.MapToMean2())
+
+              //  .keyBy(0)
+               // .timeWindow(Time.milliseconds(windowTime), Time.milliseconds(slidingTime))
+               // .apply(new Aggregations.TSExtractor())
                 ;
 
 
