@@ -68,8 +68,7 @@ public class SparkWindowFromKafka implements Serializable{
 
         SparkConf sparkConf = new SparkConf()
                 .setAppName(APPLICATION_NAME)
-              //  .set("spark.streaming.receiver.maxRate",String.valueOf(conf.getMaxReceiverRate()))
-                //.set("spark.streaming.kafka.maxRatePerPartition",String.valueOf(conf.getMaxReceiverRate()))
+               .set("spark.streaming.kafka.maxRatePerPartition",String.valueOf(conf.getWorkload()))
                 .set("spark.streaming.backpressure.enabled","true")
                 .set("spark.streaming.backpressure.initialRate","1000")
                 .setMaster(MASTER);
@@ -97,12 +96,8 @@ public class SparkWindowFromKafka implements Serializable{
         kafkaParams.put("value.deserializer", StringDeserializer.class);
         //kafkaParams.put("auto.commit.enable","true");
         //kafkaParams.put("auto.commit.interval.ms","1000");
-        kafkaParams.put("max.partition.fetch.bytes","1000");
-        kafkaParams.put("max.fetch.bytes","1000");
-        kafkaParams.put("fetch.max.bytes","1024");
-        kafkaParams.put("fetch.min.bytes","1");
-        kafkaParams.put("max.message.bytes","1024");
-        kafkaParams.put("message.max.bytes","1024");
+//        kafkaParams.put("max.partition.fetch.bytes","1000");
+  //      kafkaParams.put("fetch.min.bytes","1");
         //kafkaParams.put("fetch.message.max.bytes","1024");
         //kafkaParams.put("consumer.timeout.ms","1000");
 
