@@ -30,6 +30,9 @@ public class Conf {
  int workload;
  int numberRecords;
  String filepath;
+ int produceLoop;
+ int timeout;
+ int writeOutput;
     public int getWindowType() {
         return windowType;
     }
@@ -78,6 +81,12 @@ public class Conf {
 
     public int getNumberRecords() {        return numberRecords;    }
 
+    public int getProduceLoop() {        return produceLoop;    }
+
+    public int getTimeout() {        return timeout;    }
+
+    public int getWriteOutput() {        return writeOutput;    }
+
     public Conf(){
 
     try {
@@ -103,6 +112,9 @@ public class Conf {
         newOffset=ini.get("kafka", "new_offset", int.class);
         workload =ini.get("kafka", "workload", int.class);
         numberRecords =ini.get("kafka", "number_records", int.class);
+        produceLoop =ini.get("kafka", "produce_loop", int.class);
+        timeout =ini.get("system", "timeout", int.class);
+        writeOutput =ini.get("system", "write_output", int.class);
     }catch (IOException e){
         e.printStackTrace();
     }

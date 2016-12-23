@@ -126,13 +126,21 @@ env.getConfig().setLatencyTrackingInterval(2000);
                // .apply(new Aggregations.TSExtractor())
                 ;
 
-
-
+        String filePath="src/main/resources/results/flink/"+windowTime+"/"+slidingTime+"/"+String.valueOf(System.currentTimeMillis())+".csv";
+    if(conf.getWriteOutput()==0){
         // print result on stdout
         averagePassengers.print();
-
-        String filePath="src/main/resources/results/flink/"+windowTime+"/"+slidingTime+"/"+String.valueOf(System.currentTimeMillis())+"";
+    }else if(conf.getWriteOutput()==1){
         averagePassengers.writeAsText(filePath);
+    }else if(conf.getWriteOutput()==2){
+        // print result on stdout
+        averagePassengers.print();
+        averagePassengers.writeAsText(filePath);
+    }
+
+
+
+
 
 
      //   averagePassengers.writeAsCsv(filePath);

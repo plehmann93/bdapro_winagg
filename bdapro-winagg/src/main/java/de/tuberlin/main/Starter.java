@@ -18,7 +18,7 @@ public class Starter {
         if (conf.getFlink() == 1) {
             new FlinkWindowFromKafka(conf);
 
-        }else{
+        }else if(conf.getFlink() == 0){
             new SparkWindowFromKafka(conf);
         }
     }

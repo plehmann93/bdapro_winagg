@@ -94,23 +94,9 @@ public class SparkWindowFromKafka implements Serializable{
         }
         kafkaParams.put("key.deserializer", StringDeserializer.class);
         kafkaParams.put("value.deserializer", StringDeserializer.class);
-        //kafkaParams.put("auto.commit.enable","true");
-        //kafkaParams.put("auto.commit.interval.ms","1000");
-//        kafkaParams.put("max.partition.fetch.bytes","1000");
-  //      kafkaParams.put("fetch.min.bytes","1");
-        //kafkaParams.put("fetch.message.max.bytes","1024");
-        //kafkaParams.put("consumer.timeout.ms","1000");
 
-    /*    JavaPairInputDStream<String,String> messages = KafkaUtils.createDirectStream(
-                jssc,
-                String.class,
-                String.class,
-                StringDecoder.class,
-                StringDecoder.class,
-                kafkaParams,
-                topics
-        );
-*/
+
+
 
         final JavaInputDStream<ConsumerRecord<String,String>> messages = KafkaUtils.createDirectStream(
                 jssc,
@@ -118,22 +104,17 @@ public class SparkWindowFromKafka implements Serializable{
                // ConsumerStrategies.Assign(topics,kafkaParams)
                 ConsumerStrategies.<String,String>Subscribe(topics,kafkaParams)
         );
-       //System.out.println("jjj "+messages.count());
-        /*
-      messages.mapToPair(
-               new PairFunction<ConsumerRecord<String,String>, String, String>() {
-                @Override
-                public Tuple2<String,String> call(ConsumerRecord<String,String> record){
-                    return new Tuple2<>(record.key(),record.value());
-           }
-       })
-              .map(x-> x._2)
-
-              .print();
 
 
 
-*/
+        Function<Tuple4<Double, Integer, Long,Long>,Integer> printFunction = new Function<Tuple4<Double, Integer, Long, Long>, Integer>() {
+            @Override
+            public Integer call(Tuple4<Double, Integer, Long, Long> in) throws Exception {
+                System.out.println(in);
+                return 0;
+            }
+        };
+
         SimpleDateFormat sdf=new SimpleDateFormat("MM/dd/yyyy h:mm:ss a");
         sdf.setTimeZone(TimeZone.getTimeZone("GMT"));
 
@@ -163,33 +144,25 @@ public class SparkWindowFromKafka implements Serializable{
 
                 .map(x->new Tuple4<Double, Integer, Long,Long>(new Double(x.f1*1000/x.f0)/1000.0,x.f0,System.currentTimeMillis()-x.f2,x.f2));
 
-
-        averagePassengers.print();
-        /*averagePassengers.map(x->{
-            if (x._2() > 0) {
-            }else{
-                jssc.stop();
-            }
-            return 0;
-        });
-*/
-
-/*
-        //averagePassengers.writeAsCsv("src/main/resources/results/tumbling/"+String.valueOf(System.currentTimeMillis())+"/");
         String path="src/main/resources/results/spark/";
-        String fileName=windowTime+"/"+slidingTime+"/"+String.valueOf(System.currentTimeMillis());
+        String fileName=windowTime+"/"+slidingTime+"/"+"file";//String.valueOf(System.currentTimeMillis());
         String suffix="";
-        averagePassengers.dstream().saveAsTextFiles(path+fileName,suffix);
-        ;
-               // .foreachRDD( (rdd,time)-> (rdd,time) );
+      averagePassengers.print();
+        if(conf.getWriteOutput()==0){
+            // print result on stdout
+            averagePassengers.print();
+        }else if(conf.getWriteOutput()==1){
+            averagePassengers.dstream().saveAsTextFiles(path+fileName,suffix);
+        }else if(conf.getWriteOutput()==2){
+            averagePassengers.print();
+            averagePassengers.dstream().saveAsTextFiles(path+fileName,suffix);
+        }
 
-*/
-        //averagePassengers.writeAsCsv("src/main/resources/results/tumbling/"+String.valueOf(System.currentTimeMillis())+"/");
 
         jssc.start();
 
-        jssc.awaitTermination();
-       // jssc.awaitTerminationOrTimeout(20000);
+       // jssc.awaitTermination();
+        jssc.awaitTerminationOrTimeout(conf.getTimeout());
         jssc.stop();
     }
 
