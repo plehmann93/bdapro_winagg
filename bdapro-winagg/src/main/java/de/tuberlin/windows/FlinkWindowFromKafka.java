@@ -5,6 +5,7 @@ import com.dataartisans.flinktraining.exercises.datastream_java.utils.TaxiRideSc
 import de.tuberlin.io.Conf;
 import org.apache.flink.api.java.tuple.Tuple;
 import org.apache.flink.api.java.tuple.Tuple3;
+import org.apache.flink.api.java.tuple.Tuple4;
 import org.apache.flink.api.java.tuple.Tuple5;
 import org.apache.flink.hadoop.shaded.org.jboss.netty.handler.codec.string.StringDecoder;
 import org.apache.flink.streaming.api.TimeCharacteristic;
@@ -95,7 +96,7 @@ env.getConfig().setLatencyTrackingInterval(2000);
         //StreamRecord r=new StreamRecord();
         //r.getTimestamp():
         // find average number of passengers per minute starting a taxi ride
-        DataStream<Tuple3<Double, String, Long>> averagePassengers = rides
+        DataStream<Tuple4<Double, String, Long,Long>> averagePassengers = rides
 
                 //filter out those events that are not starting
 
@@ -127,16 +128,17 @@ env.getConfig().setLatencyTrackingInterval(2000);
                // .apply(new Aggregations.TSExtractor())
                 ;
 
+
         String filePath="src/main/resources/results/flink/"+windowTime+"/"+slidingTime+"/"+conf.getWorkload()+"/"+String.valueOf(System.currentTimeMillis())+".csv";
     if(conf.getWriteOutput()==0){
         // print result on stdout
         averagePassengers.print();
     }else if(conf.getWriteOutput()==1){
-        averagePassengers.writeAsText(filePath);
+        averagePassengers.map(new Aggregations.MapOutput()).writeAsText(filePath);
     }else if(conf.getWriteOutput()==2){
         // print result on stdout
         averagePassengers.print();
-        averagePassengers.writeAsText(filePath);
+        averagePassengers.map(new Aggregations.MapOutput()).writeAsText(filePath);
     }
 
 

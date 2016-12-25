@@ -1,62 +1,8 @@
 OpenJDK 64-Bit Server VM (25.111-b14) for linux-amd64 JRE (1.8.0_111-8u111-b14-2ubuntu0.16.10.2-b14), built on Oct 27 2016 14:16:18 by "buildd" with gcc 6.2.0 20161005
-Memory: 4k page, physical 4046324k(115212k free), swap 4193276k(4193168k free)
+Memory: 4k page, physical 4046308k(2753992k free), swap 4193276k(4193276k free)
 CommandLine flags: -XX:+DisableExplicitGC -XX:InitialHeapSize=536870912 -XX:InitiatingHeapOccupancyPercent=35 -XX:+ManagementServer -XX:MaxGCPauseMillis=20 -XX:MaxHeapSize=536870912 -XX:+PrintGC -XX:+PrintGCDateStamps -XX:+PrintGCDetails -XX:+PrintGCTimeStamps -XX:+UseCompressedClassPointers -XX:+UseCompressedOops -XX:+UseG1GC 
-2016-12-18T19:20:25.753+0100: 5324,557: [GC pause (G1 Evacuation Pause) (young), 0,0139319 secs]
-   [Parallel Time: 13,2 ms, GC Workers: 1]
-      [GC Worker Start (ms):  5324557,1]
-      [Ext Root Scanning (ms):  3,1]
-      [Update RS (ms):  0,0]
-         [Processed Buffers:  0]
-      [Scan RS (ms):  0,0]
-      [Code Root Scanning (ms):  0,5]
-      [Object Copy (ms):  3,2]
-      [Termination (ms):  0,0]
-         [Termination Attempts:  1]
-      [GC Worker Other (ms):  0,0]
-      [GC Worker Total (ms):  6,8]
-      [GC Worker End (ms):  5324563,9]
-   [Code Root Fixup: 0,1 ms]
-   [Code Root Purge: 0,0 ms]
-   [Clear CT: 0,0 ms]
-   [Other: 0,6 ms]
-      [Choose CSet: 0,0 ms]
-      [Ref Proc: 0,5 ms]
-      [Ref Enq: 0,0 ms]
-      [Redirty Cards: 0,0 ms]
-      [Humongous Register: 0,0 ms]
-      [Humongous Reclaim: 0,0 ms]
-      [Free CSet: 0,0 ms]
-   [Eden: 25,0M(25,0M)->0,0B(21,0M) Survivors: 0,0B->4096,0K Heap: 25,0M(512,0M)->3490,6K(512,0M)]
- [Times: user=0,01 sys=0,00, real=0,01 secs] 
-2016-12-19T11:35:23.339+0100: 21338,418: [GC pause (G1 Evacuation Pause) (young), 0,0694615 secs]
-   [Parallel Time: 61,5 ms, GC Workers: 1]
-      [GC Worker Start (ms):  21338419,1]
-      [Ext Root Scanning (ms):  35,9]
-      [Update RS (ms):  0,0]
-         [Processed Buffers:  0]
-      [Scan RS (ms):  0,0]
-      [Code Root Scanning (ms):  17,3]
-      [Object Copy (ms):  6,9]
-      [Termination (ms):  0,0]
-         [Termination Attempts:  1]
-      [GC Worker Other (ms):  0,5]
-      [GC Worker Total (ms):  60,7]
-      [GC Worker End (ms):  21338479,8]
-   [Code Root Fixup: 0,1 ms]
-   [Code Root Purge: 0,0 ms]
-   [Clear CT: 0,0 ms]
-   [Other: 7,8 ms]
-      [Choose CSet: 0,2 ms]
-      [Ref Proc: 3,0 ms]
-      [Ref Enq: 0,4 ms]
-      [Redirty Cards: 0,0 ms]
-      [Humongous Register: 0,0 ms]
-      [Humongous Reclaim: 0,0 ms]
-      [Free CSet: 3,4 ms]
-   [Eden: 21,0M(21,0M)->0,0B(24,0M) Survivors: 4096,0K->1024,0K Heap: 24,4M(512,0M)->3197,5K(512,0M)]
- [Times: user=0,01 sys=0,00, real=0,07 secs] 
 Heap
- garbage-first heap   total 524288K, used 3197K [0x00000000e0000000, 0x00000000e0101000, 0x0000000100000000)
-  region size 1024K, 2 young (2048K), 1 survivors (1024K)
- Metaspace       used 10298K, capacity 10592K, committed 10752K, reserved 1058816K
-  class space    used 1158K, capacity 1252K, committed 1280K, reserved 1048576K
+ garbage-first heap   total 524288K, used 19456K [0x00000000e0000000, 0x00000000e0101000, 0x0000000100000000)
+  region size 1024K, 20 young (20480K), 0 survivors (0K)
+ Metaspace       used 10113K, capacity 10368K, committed 10496K, reserved 1058816K
+  class space    used 1150K, capacity 1220K, committed 1280K, reserved 1048576K

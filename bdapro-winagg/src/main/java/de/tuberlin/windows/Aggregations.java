@@ -51,15 +51,15 @@ public class Aggregations {
     /**
      Maps Taxiride so just id of ride and passengercount stays
      */
-    public static class MapToMean implements MapFunction< Tuple3<Integer, Integer,Long> , Tuple3<Double, String,Long>> {
+    public static class MapToMean implements MapFunction< Tuple3<Integer, Integer,Long> , Tuple4<Double, String,Long,Long>> {
 
 
-        public Tuple3<Double, String,Long> map( Tuple3<Integer, Integer,Long> t) throws Exception {
+        public Tuple4<Double,String,Long,Long> map( Tuple3<Integer, Integer,Long> t) throws Exception {
             Long millis=System.currentTimeMillis();
             String timeStamp = new Date(millis).toString();
             Long duration=millis-t.f2;
 
-            return new Tuple3<Double,String,Long>(Math.round(t.f1/new Double(t.f0)*1000)/1000.0,String.valueOf(t.f0), duration);
+            return new Tuple4<Double,String,Long,Long>(Math.round(t.f1/new Double(t.f0)*1000)/1000.0,String.valueOf(t.f0), duration,millis);
 
         }
     }
@@ -76,6 +76,22 @@ public class Aggregations {
             Long duration=millis-t.f2;
 
             return new Tuple3<Double,Double,Long>(Math.round(t.f1/new Double(t.f0)*1000)/1000.0,Double.valueOf(t.f0), millis);
+
+        }
+    }
+
+    /**
+     Maps Taxiride so just id of ride and passengercount stays
+     */
+    public static class MapOutput implements MapFunction< Tuple4<Double, String,Long,Long> , Tuple6<String, Double, String,Long,Long,String>> {
+
+
+        public Tuple6<String,Double,String,Long,Long,String> map( Tuple4<Double, String,Long,Long>  t) throws Exception {
+            Long millis=System.currentTimeMillis();
+            String timeStamp = new Date(millis).toString();
+            Long duration=millis-t.f2;
+
+            return new Tuple6<String,Double,String,Long,Long,String>(",",t.f0,t.f1,t.f2,t.f3,",");
 
         }
     }

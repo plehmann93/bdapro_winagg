@@ -8,6 +8,7 @@ import de.tuberlin.source.TaxiRide;
 import kafka.serializer.DefaultDecoder;
 import kafka.serializer.StringDecoder;
 import org.apache.commons.collections.map.HashedMap;
+import org.apache.flink.api.java.tuple.Tuple6;
 import org.apache.kafka.clients.consumer.Consumer;
 import scala.Tuple2;
 
@@ -152,10 +153,10 @@ public class SparkWindowFromKafka implements Serializable{
             // print result on stdout
             averagePassengers.print();
         }else if(conf.getWriteOutput()==1){
-            averagePassengers.dstream().saveAsTextFiles(path+fileName,suffix);
+            averagePassengers.map(x->new Tuple6<>(",",x._1(),x._2(),x._3(),x._4(),",")).dstream().saveAsTextFiles(path+fileName,suffix);
         }else if(conf.getWriteOutput()==2){
             averagePassengers.print();
-            averagePassengers.dstream().saveAsTextFiles(path+fileName,suffix);
+            averagePassengers.map(x->new Tuple6<>(",",x._1(),x._2(),x._3(),x._4(),",")).dstream().saveAsTextFiles(path+fileName,suffix);
         }
 
 
