@@ -145,7 +145,7 @@ public class SparkWindowFromKafka implements Serializable{
                 .map(x->new Tuple4<Double, Integer, Long,Long>(new Double(x.f1*1000/x.f0)/1000.0,x.f0,System.currentTimeMillis()-x.f2,x.f2));
 
         String path="src/main/resources/results/spark/";
-        String fileName=windowTime+"/"+slidingTime+"/"+"file";//String.valueOf(System.currentTimeMillis());
+        String fileName=windowTime+"/"+slidingTime+"/"+conf.getWorkload()+"/"+"file";//String.valueOf(System.currentTimeMillis());
         String suffix="";
       averagePassengers.print();
         if(conf.getWriteOutput()==0){

@@ -95,7 +95,7 @@ env.getConfig().setLatencyTrackingInterval(2000);
         //StreamRecord r=new StreamRecord();
         //r.getTimestamp():
         // find average number of passengers per minute starting a taxi ride
-        DataStream<Tuple5<Double, String, Long,Long,Long>> averagePassengers = rides
+        DataStream<Tuple3<Double, String, Long>> averagePassengers = rides
 
                 //filter out those events that are not starting
 
@@ -116,9 +116,10 @@ env.getConfig().setLatencyTrackingInterval(2000);
                 //.timeWindowAll(Time.milliseconds(windowTime), Time.milliseconds(slidingTime)
 
                 //sums the 1s and the passengers for the whole window
-                .reduce(new Aggregations.SumAllValues(),new Aggregations.TSExtractor())
+                .reduce(new Aggregations.SumAllValues())
+                //.reduce(new Aggregations.SumAllValues(),new Aggregations.TSExtractor())
 
-                //.map(new Aggregations.MapToMean())
+                .map(new Aggregations.MapToMean())
              //   .map(new Aggregations.MapToMean2())
 
               //  .keyBy(0)
@@ -126,7 +127,7 @@ env.getConfig().setLatencyTrackingInterval(2000);
                // .apply(new Aggregations.TSExtractor())
                 ;
 
-        String filePath="src/main/resources/results/flink/"+windowTime+"/"+slidingTime+"/"+String.valueOf(System.currentTimeMillis())+".csv";
+        String filePath="src/main/resources/results/flink/"+windowTime+"/"+slidingTime+"/"+conf.getWorkload()+"/"+String.valueOf(System.currentTimeMillis())+".csv";
     if(conf.getWriteOutput()==0){
         // print result on stdout
         averagePassengers.print();
