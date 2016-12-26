@@ -1,44 +1,28 @@
 package de.tuberlin.windows;
 
-import com.dataartisans.flinktraining.exercises.datastream_java.sources.TaxiRideSource;
-import com.dataartisans.flinktraining.exercises.datastream_java.utils.TaxiRideSchema;
 import de.tuberlin.io.Conf;
-import de.tuberlin.io.TaxiClass;
-import de.tuberlin.source.TaxiRide;
-import kafka.serializer.DefaultDecoder;
-import kafka.serializer.StringDecoder;
-import org.apache.commons.collections.map.HashedMap;
-import org.apache.flink.api.java.tuple.Tuple6;
-import org.apache.kafka.clients.consumer.Consumer;
-import scala.Tuple2;
-
-import org.apache.flink.api.java.tuple.Tuple3;
-import org.apache.kafka.clients.consumer.ConsumerRecord;
+import de.tuberlin.serialization.SparkStringTsDeserializer;
+import de.tuberlin.io.TaxiRideClass;
 import org.apache.kafka.common.serialization.StringDeserializer;
-import org.apache.kafka.common.TopicPartition;
+
+//import org.apache.flink.api.java.tuple.Tuple3;
+import org.apache.kafka.clients.consumer.ConsumerRecord;
+//import org.apache.kafka.common.serialization.StringDeserializer;
 import org.apache.spark.SparkConf;
-import org.apache.spark.TaskContext;
-import org.apache.spark.api.java.*;
-import org.apache.spark.api.java.function.*;
 import org.apache.spark.api.java.JavaSparkContext;
-import org.apache.spark.api.java.function.Function;
-import org.apache.spark.api.java.function.Function2;
 import org.apache.spark.streaming.Duration;
-import org.apache.spark.streaming.Time;
 import org.apache.spark.streaming.api.java.JavaDStream;
-import org.apache.spark.streaming.api.java.*;
 import org.apache.spark.streaming.api.java.JavaInputDStream;
-import org.apache.spark.streaming.api.java.JavaPairInputDStream;
 import org.apache.spark.streaming.api.java.JavaStreamingContext;
 
 import org.apache.spark.streaming.kafka010.*;
-import org.apache.spark.util.SystemClock;
+import scala.Tuple3;
 import scala.Tuple4;
+import scala.Tuple6;
 
 import java.io.Serializable;
 import java.math.BigInteger;
 import java.security.SecureRandom;
-import java.text.SimpleDateFormat;
 import java.util.*;
 
 /**
@@ -88,13 +72,13 @@ public class SparkWindowFromKafka implements Serializable{
        // kafkaParams.put("zookeeper.connect", LOCAL_ZOOKEEPER_HOST);
         //kafkaParams.put("metadata.broker.list",LOCAL_KAFKA_BROKER);
         kafkaParams.put("bootstrap.servers",LOCAL_KAFKA_BROKER);
-        kafkaParams.put("auto.offset.reset","earliest");
-        kafkaParams.put("enable.auto.commit","false");
+        kafkaParams.put("auto.offset.reset","latest");
+        kafkaParams.put("enable.auto.commit","true");
         if(conf.getNewOffset()==1){ kafkaParams.put("group.id", id);}else{
             kafkaParams.put("group.id", conf.getGroupId());
         }
         kafkaParams.put("key.deserializer", StringDeserializer.class);
-        kafkaParams.put("value.deserializer", StringDeserializer.class);
+        kafkaParams.put("value.deserializer", SparkStringTsDeserializer.class);
 
 
 
@@ -107,46 +91,25 @@ public class SparkWindowFromKafka implements Serializable{
         );
 
 
-
-        Function<Tuple4<Double, Integer, Long,Long>,Integer> printFunction = new Function<Tuple4<Double, Integer, Long, Long>, Integer>() {
-            @Override
-            public Integer call(Tuple4<Double, Integer, Long, Long> in) throws Exception {
-                System.out.println(in);
-                return 0;
-            }
-        };
-
-        SimpleDateFormat sdf=new SimpleDateFormat("MM/dd/yyyy h:mm:ss a");
-        sdf.setTimeZone(TimeZone.getTimeZone("GMT"));
-
-       // messages.map(x->x.)
-
-       JavaDStream<Tuple2<String,Time>> messagesTs= messages.transform(new Function2<JavaRDD<ConsumerRecord<String, String>>, Time, JavaRDD<Tuple2<String,Time>> >() {
-            @Override
-            public JavaRDD<Tuple2<String,Time>> call(JavaRDD<ConsumerRecord<String, String>> record, Time time) throws Exception {
-                                return record.map( (x->new Tuple2<String, Time>(x.value(),time)));
-            }
-        });
-
 /*
+
 */
+        JavaDStream<Tuple4<Double, Long, Long,Long>> averagePassengers=messages
+        //messages
+                .map(x->new Tuple3<Long,Long,Long>(1L,Long.valueOf(TaxiRideClass.fromString(x.value()).passengerCnt)
+                            ,TaxiRideClass.fromString(x.value()).timestamp))
 
-        JavaDStream<Tuple4<Double, Integer, Long,Long>> averagePassengers=messagesTs
-               // .map(x -> TaxiRide.fromString(x._2))
-                .map(x->new Tuple3<Integer,Long,Long>(1,Long.valueOf(TaxiRide.fromString(x._1).passengerCnt),x._2.milliseconds()))
-                //.map(x->new Tuple3<Integer,Long,Long>(1,Long.valueOf(TaxiRide.fromString(x.value()).passengerCnt),System.currentTimeMillis()))
 
+              //  .reduceByWindow( ( x,y)-> new Tuple3<Long, Long, Long>(x._1()+y._1(),x._2()+y._2(),x._3()<y._3()?y._3():x._3())
+              //          ,new Duration(windowTime*multiplication_factor),new Duration(slidingTime*multiplication_factor))
+                .window(new Duration(windowTime*multiplication_factor),new Duration(slidingTime*multiplication_factor))
+             //   .print();
+               .reduce( (x,y)-> new Tuple3<Long, Long, Long>(x._1()+y._1(),x._2()+y._2(),x._3()<y._3()?y._3():x._3() ) )
 
-                .reduceByWindow( (x,y)-> new Tuple3<Integer, Long, Long>(x.f0+y.f0,x.f1+y.f1,x.f2<y.f2?y.f2:x.f2)
-                        , new Duration(windowTime*multiplication_factor),new Duration(slidingTime*multiplication_factor))
-
-              //  .window(new Duration(windowTime*multiplication_factor),new Duration(slidingTime*multiplication_factor))
-              //  .reduce( (x,y)-> new Tuple3<Integer, Long, Long>(x.f0+y.f0,x.f1+y.f1,x.f2<y.f2?y.f2:x.f2) )
-
-                .map(x->new Tuple4<Double, Integer, Long,Long>(new Double(x.f1*1000/x.f0)/1000.0,x.f0,System.currentTimeMillis()-x.f2,x.f2));
+               .map(x->new Tuple4<Double, Long, Long,Long>(new Double(x._2()*1000/x._1())/1000.0,x._1(),System.currentTimeMillis()-x._3(),System.currentTimeMillis()));
 
         String path="src/main/resources/results/spark/";
-        String fileName=windowTime+"/"+slidingTime+"/"+conf.getWorkload()+"/"+"file";//String.valueOf(System.currentTimeMillis());
+        String fileName=windowTime+"/"+slidingTime+"/"+conf.getWorkload()+"/"+"file_"+batchsize;
         String suffix="";
       averagePassengers.print();
         if(conf.getWriteOutput()==0){

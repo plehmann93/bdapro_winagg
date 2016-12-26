@@ -1,34 +1,14 @@
 package de.tuberlin.windows;
 
-import com.dataartisans.flinktraining.exercises.datastream_java.datatypes.TaxiRide;
-import com.dataartisans.flinktraining.exercises.datastream_java.utils.TaxiRideSchema;
 import de.tuberlin.io.Conf;
-import org.apache.flink.api.java.tuple.Tuple;
-import org.apache.flink.api.java.tuple.Tuple3;
+import de.tuberlin.serialization.FlinkSimpleStringTsSchema;
 import org.apache.flink.api.java.tuple.Tuple4;
-import org.apache.flink.api.java.tuple.Tuple5;
-import org.apache.flink.hadoop.shaded.org.jboss.netty.handler.codec.string.StringDecoder;
 import org.apache.flink.streaming.api.TimeCharacteristic;
 import org.apache.flink.streaming.api.datastream.DataStream;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
-import org.apache.flink.streaming.api.functions.AssignerWithPeriodicWatermarks;
-import org.apache.flink.streaming.api.functions.timestamps.BoundedOutOfOrdernessTimestampExtractor;
-import org.apache.flink.streaming.api.functions.windowing.WindowFunction;
-import org.apache.flink.streaming.api.watermark.Watermark;
-import org.apache.flink.streaming.api.windowing.assigners.SlidingProcessingTimeWindows;
-import org.apache.flink.streaming.api.windowing.assigners.TumblingProcessingTimeWindows;
 import org.apache.flink.streaming.api.windowing.time.Time;
-import org.apache.flink.streaming.api.windowing.windows.TimeWindow;
 import org.apache.flink.streaming.connectors.kafka.FlinkKafkaConsumer010;
-import org.apache.flink.streaming.connectors.kafka.FlinkKafkaConsumer09;
-import org.apache.flink.streaming.runtime.streamrecord.StreamRecord;
-import org.apache.flink.streaming.runtime.tasks.ProcessingTimeService;
-import org.apache.flink.streaming.util.serialization.SimpleStringSchema;
-import org.apache.kafka.clients.consumer.Consumer;
-import org.apache.kafka.clients.consumer.ConsumerRecord;
-import org.glassfish.jersey.server.monitoring.TimeWindowStatistics;
 
-import javax.annotation.Nullable;
 import java.math.BigInteger;
 import java.security.SecureRandom;
 import java.util.Properties;
@@ -84,7 +64,7 @@ env.getConfig().setLatencyTrackingInterval(2000);
         // create a Kafka consumer
         FlinkKafkaConsumer010<String> consumer = new FlinkKafkaConsumer010<>(
                 TOPIC_NAME,
-                new SimpleStringSchema(),
+                new FlinkSimpleStringTsSchema(),
                 kafkaProps);
         // assign a timestamp extractor to the consumer
         //    consumer.assignTimestampsAndWatermarks(new org.apache.flink.quickstart.FromKafka.TaxiRideTSExtractor());
@@ -92,11 +72,11 @@ env.getConfig().setLatencyTrackingInterval(2000);
         // create a TaxiRide data stream
         DataStream<String> rides = env.addSource(consumer);
       //  rides.getTransformation().getOutputType().
-
+//rides.print();
         //StreamRecord r=new StreamRecord();
         //r.getTimestamp():
         // find average number of passengers per minute starting a taxi ride
-        DataStream<Tuple4<Double, String, Long,Long>> averagePassengers = rides
+       DataStream<Tuple4<Double, Long, Long,Long>> averagePassengers = rides
 
                 //filter out those events that are not starting
 
