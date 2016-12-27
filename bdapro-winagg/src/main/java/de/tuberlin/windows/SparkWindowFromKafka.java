@@ -53,9 +53,9 @@ public class SparkWindowFromKafka implements Serializable{
 
         SparkConf sparkConf = new SparkConf()
                 .setAppName(APPLICATION_NAME)
-               .set("spark.streaming.kafka.maxRatePerPartition",String.valueOf(conf.getWorkload()))
+              // .set("spark.streaming.kafka.maxRatePerPartition",String.valueOf(conf.getWorkload()))
                 .set("spark.streaming.backpressure.enabled","true")
-                .set("spark.streaming.backpressure.initialRate","1000")
+                //.set("spark.streaming.backpressure.initialRate","1000")
                 .setMaster(MASTER);
 
 
@@ -111,7 +111,7 @@ public class SparkWindowFromKafka implements Serializable{
         String path="src/main/resources/results/spark/";
         String fileName=windowTime+"/"+slidingTime+"/"+conf.getWorkload()+"/"+"file_"+batchsize;
         String suffix="";
-      averagePassengers.print();
+     // averagePassengers.print();
         if(conf.getWriteOutput()==0){
             // print result on stdout
             averagePassengers.print();

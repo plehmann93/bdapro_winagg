@@ -39,7 +39,7 @@ public class FlinkWindowFromKafka {
         env.setStreamTimeCharacteristic(TimeCharacteristic.ProcessingTime);
 
         //enable latency tracking
-env.getConfig().setLatencyTrackingInterval(2000);
+        //env.getConfig().setLatencyTrackingInterval(2000);
         // env.getConfig().setAutoWatermarkInterval(1000);
 
         // configure the Kafka consumer
@@ -55,8 +55,8 @@ env.getConfig().setLatencyTrackingInterval(2000);
         //kafkaProps.setProperty("receive.buffer.bytes","250");
         //kafkaProps.setProperty("max.poll.records","500");
         // always read the Kafka topic from the start
-        kafkaProps.setProperty("auto.offset.reset", "earliest");
-        kafkaProps.setProperty("enable.auto.commit", "false");
+        kafkaProps.setProperty("auto.offset.reset", "latest");
+        kafkaProps.setProperty("enable.auto.commit", "true");
 
 
 
