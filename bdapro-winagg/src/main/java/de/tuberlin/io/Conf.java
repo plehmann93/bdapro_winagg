@@ -121,7 +121,7 @@ public class Conf {
         produceLoop =ini.get("kafka", "produce_loop", int.class);
         timeout =ini.get("system", "timeout", int.class);
         writeOutput =ini.get("system", "write_output", int.class);
-        outputPath =ini.get("system", "outputPath");
+        outputPath =ini.get("system", "output_path");
     }catch (IOException e){
         e.printStackTrace();
     }

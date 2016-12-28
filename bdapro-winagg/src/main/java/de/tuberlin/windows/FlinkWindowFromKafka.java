@@ -109,7 +109,7 @@ public class FlinkWindowFromKafka {
                 ;
 
 
-        String filePath="src/main/resources/results/flink/"+windowTime+"/"+slidingTime+"/"+conf.getWorkload()+"/"+String.valueOf(System.currentTimeMillis())+".csv";
+        String filePath=conf.getOutputPath()+"flink/"+windowTime+"/"+slidingTime+"/"+conf.getWorkload()+"/"+String.valueOf(System.currentTimeMillis())+".csv";
     if(conf.getWriteOutput()==0){
         // print result on stdout
         averagePassengers.print();

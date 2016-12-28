@@ -177,67 +177,26 @@ under the License.
                     <groupId>org.apache.flink</groupId>
                     <artifactId>flink-java</artifactId>
                     <version>${flink.version}</version>
-					<scope>provided</scope>
                 </dependency>
                 <dependency>
                     <groupId>org.apache.flink</groupId>
                     <artifactId>flink-streaming-java_2.11</artifactId>
                     <version>${flink.version}</version>
-					<scope>provided</scope>
                 </dependency>
                 <dependency>
                     <groupId>org.apache.flink</groupId>
                     <artifactId>flink-clients_2.11</artifactId>
                     <version>${flink.version}</version>
-					<scope>provided</scope>
                 </dependency>
                 <dependency>
                     <groupId>com.data-artisans</groupId>
                     <artifactId>flink-training-exercises</artifactId>
                     <version>0.6</version>
-					<scope>compile</scope>
                 </dependency>
 				<dependency>
 					<groupId>org.apache.flink</groupId>
 					<artifactId>flink-connector-kafka-0.10_2.11</artifactId>
 					<version>1.2-SNAPSHOT</version>
-					<scope>provided</scope>
-				</dependency>
-
-
-                <dependency>
-                    <groupId>org.apache.spark</groupId>
-                    <artifactId>spark-core_2.11</artifactId>
-                    <version>${spark.version}</version>
-					<scope>provided</scope>
-                </dependency>
-                <dependency>
-                    <groupId>org.apache.spark</groupId>
-                    <artifactId>spark-streaming_2.11</artifactId>
-                    <version>${spark.version}</version>
-					<scope>provided</scope>
-                </dependency>
-
-				<dependency>
-					<groupId>org.apache.spark</groupId>
-					<artifactId>spark-streaming-kafka-0-10_2.11</artifactId>
-					<version>${spark.version}</version>
-					<scope>provided</scope>
-				</dependency>
-
-
-
-				<dependency>
-                    <groupId>org.apache.hadoop</groupId>
-                    <artifactId>hadoop-client</artifactId>
-                    <version>2.7.1</version>
-                </dependency>
-
-
-				<dependency>
-					<groupId>org.apache.kafka</groupId>
-					<artifactId>kafka-clients</artifactId>
-					<version>0.10.0.1</version>
 				</dependency>
 
 				<dependency>
@@ -245,6 +204,36 @@ under the License.
 					<artifactId>ini4j</artifactId>
 					<version>0.5.2</version>
 				</dependency>
+
+                <dependency>
+                    <groupId>org.apache.spark</groupId>
+                    <artifactId>spark-core_2.11</artifactId>
+                    <version>${spark.version}</version>
+					<scope>compile</scope>
+                </dependency>
+                <dependency>
+                    <groupId>org.apache.spark</groupId>
+                    <artifactId>spark-streaming_2.11</artifactId>
+                    <version>${spark.version}</version>
+					<scope>compile</scope>
+                </dependency>
+
+				<dependency>
+					<groupId>org.apache.spark</groupId>
+					<artifactId>spark-streaming-kafka-0-10_2.11</artifactId>
+					<version>${spark.version}</version>
+					<scope>compile</scope>
+				</dependency>
+
+				<dependency>
+					<groupId>org.apache.hadoop</groupId>
+					<artifactId>hadoop-client</artifactId>
+					<version>2.7.1</version>
+				</dependency>
+
+
+
+
 
 			</dependencies>
 
@@ -297,19 +286,19 @@ under the License.
 									Everything else will be packaged into the fat-jar
 									-->
 									<exclude>org.apache.flink:flink-annotations</exclude>
-									<exclude>org.apache.flink:flink-shaded-hadoop1_2.10</exclude>
+									<exclude>org.apache.flink:flink-shaded-hadoop1_2.11</exclude>
 									<exclude>org.apache.flink:flink-shaded-hadoop2</exclude>
 									<exclude>org.apache.flink:flink-shaded-curator-recipes</exclude>
 									<exclude>org.apache.flink:flink-core</exclude>
 									<exclude>org.apache.flink:flink-java</exclude>
-									<exclude>org.apache.flink:flink-scala_2.10</exclude>
-									<exclude>org.apache.flink:flink-runtime_2.10</exclude>
-									<exclude>org.apache.flink:flink-optimizer_2.10</exclude>
-									<exclude>org.apache.flink:flink-clients_2.10</exclude>
-									<exclude>org.apache.flink:flink-avro_2.10</exclude>
-									<exclude>org.apache.flink:flink-examples-batch_2.10</exclude>
-									<exclude>org.apache.flink:flink-examples-streaming_2.10</exclude>
-									<exclude>org.apache.flink:flink-streaming-java_2.10</exclude>
+									<exclude>org.apache.flink:flink-scala_2.11</exclude>
+									<exclude>org.apache.flink:flink-runtime_2.11</exclude>
+									<exclude>org.apache.flink:flink-optimizer_2.11</exclude>
+									<exclude>org.apache.flink:flink-clients_2.11</exclude>
+									<exclude>org.apache.flink:flink-avro_2.11</exclude>
+									<exclude>org.apache.flink:flink-examples-batch_2.11</exclude>
+									<exclude>org.apache.flink:flink-examples-streaming_2.11</exclude>
+									<exclude>org.apache.flink:flink-streaming-java_2.11</exclude>
 
 									<!-- Also exclude very big transitive dependencies of Flink
 
@@ -382,13 +371,13 @@ under the License.
 							</filters>
                             <!-- If you want to use ./bin/flink run <quickstart jar> uncomment the following lines.
                             This will add a Main-Class entry to the manifest file -->
-
-							<transformers>
-								<transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
-									<mainClass>de.tuberlin.main.Starter</mainClass>
-								</transformer>
-							</transformers>
-                            <!--    -->
+                            <!--dyXdyesa
+                                                        <transformers>
+                                                            <transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
+                                                                <mainClass>de.tuberlin.main.Starter</mainClass>
+                                                            </transformer>
+                                                        </transformers>
+                                                           -->
 							<createDependencyReducedPom>false</createDependencyReducedPom>
 						</configuration>
 					</execution>
@@ -404,24 +393,24 @@ under the License.
 					<target>1.8</target> <!-- If you want to use Java 8, change this to "1.8" -->
 				</configuration>
 			</plugin>
+        <!--
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-assembly-plugin</artifactId>
+                        <configuration>
+                            <archive>
+                                <manifest>
+                                    <mainClass>de.tuberlin.main.Starter</mainClass>
+                                </manifest>
+                            </archive>
+                        </configuration>
+                    </plugin>
 
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-assembly-plugin</artifactId>
-				<configuration>
-					<archive>
-						<manifest>
-							<mainClass>de.tuberlin.main.Starter</mainClass>
-						</manifest>
-					</archive>
-				</configuration>
-			</plugin>
+ -->
+                </plugins>
 
 
-		</plugins>
-		
-			
-		<!-- If you want to use Java 8 Lambda Expressions uncomment the following lines -->
+                <!-- If you want to use Java 8 Lambda Expressions uncomment the following lines -->
 		<!--
 		<pluginManagement>
 			<plugins>

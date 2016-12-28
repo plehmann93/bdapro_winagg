@@ -37,7 +37,7 @@ public class SparkWindowFromKafka implements Serializable{
         final String APPLICATION_NAME="Spark Window";
         final String LOCAL_KAFKA_BROKER = conf.getLocalKafkaBroker();
         final String GROUP_ID = conf.getGroupId();
-        final String TOPIC_NAME=conf.getTopicName();
+        final String TOPIC_NAME="spark-"+conf.getTopicName();
         final String MASTER=conf.getMaster();
 
 
@@ -54,7 +54,7 @@ public class SparkWindowFromKafka implements Serializable{
         SparkConf sparkConf = new SparkConf()
                 .setAppName(APPLICATION_NAME)
               // .set("spark.streaming.kafka.maxRatePerPartition",String.valueOf(conf.getWorkload()))
-                .set("spark.streaming.backpressure.enabled","true")
+              //  .set("spark.streaming.backpressure.enabled","true")
                 //.set("spark.streaming.backpressure.initialRate","1000")
                 .setMaster(MASTER);
 
@@ -108,7 +108,7 @@ public class SparkWindowFromKafka implements Serializable{
 
                .map(x->new Tuple4<Double, Long, Long,Long>(new Double(x._2()*1000/x._1())/1000.0,x._1(),System.currentTimeMillis()-x._3(),System.currentTimeMillis()));
 
-        String path="src/main/resources/results/spark/";
+        String path=conf.getOutputPath()+"spark/";
         String fileName=windowTime+"/"+slidingTime+"/"+conf.getWorkload()+"/"+"file_"+batchsize;
         String suffix="";
      // averagePassengers.print();
@@ -116,12 +116,13 @@ public class SparkWindowFromKafka implements Serializable{
             // print result on stdout
             averagePassengers.print();
         }else if(conf.getWriteOutput()==1){
-            averagePassengers.map(x->new Tuple6<>(",",x._1(),x._2(),x._3(),x._4(),",")).dstream().saveAsTextFiles(path+fileName,suffix);
+            averagePassengers.map(x->new Tuple6<>(",",x._1(),x._2(),x._3(),x._4(),","))
+                    .dstream().saveAsTextFiles(path+fileName,suffix);
         }else if(conf.getWriteOutput()==2){
             averagePassengers.print();
-            averagePassengers.map(x->new Tuple6<>(",",x._1(),x._2(),x._3(),x._4(),",")).dstream().saveAsTextFiles(path+fileName,suffix);
+            averagePassengers.map(x->new Tuple6<>(",",x._1(),x._2(),x._3(),x._4(),","))
+                    .dstream().saveAsTextFiles(path+fileName,suffix);
         }
-
 
         jssc.start();
 
