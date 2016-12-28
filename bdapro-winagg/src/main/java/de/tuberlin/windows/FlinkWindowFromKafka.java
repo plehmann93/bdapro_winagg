@@ -25,7 +25,7 @@ public class FlinkWindowFromKafka {
         final String LOCAL_ZOOKEEPER_HOST = conf.getLocalZookeeperHost();
         final String LOCAL_KAFKA_BROKER = conf.getLocalKafkaBroker();
         final String GROUP_ID = conf.getGroupId();
-        final String TOPIC_NAME = conf.getTopicName();
+        final String TOPIC_NAME = "flink-"+conf.getTopicName();
         //private static final String GROUP_ID = "test";
 
         final int servingSpeedFactor = conf.getServingSpeedFactor(); // events of 10 minutes are served in 1 second

@@ -38,9 +38,13 @@ public void run(){
 
     public void writeToKafkaDelayed(Conf conf) throws IOException,InterruptedException {
 
-        final String TOPIC_NAME = conf.getTopicName();
-        final String FILEPATH = conf.getFilepath();
 
+        final String FILEPATH = conf.getFilepath();
+        String systemname="spark";
+        if (conf.getFlink() == 1) {
+            systemname="flink";
+        }
+        final String TOPIC_NAME = systemname+"-"+conf.getTopicName();
         Properties kafkaProps = new Properties();
         kafkaProps.put("bootstrap.servers", "localhost:9092");
         kafkaProps.put("acks", "all");
@@ -87,7 +91,11 @@ public void run(){
 
     public void writeToKafkaLoop(Conf conf) throws IOException,InterruptedException {
 
-        final String TOPIC_NAME = conf.getTopicName();
+        String systemname="spark";
+        if (conf.getFlink() == 1) {
+            systemname="flink";
+        }
+        final String TOPIC_NAME = systemname+"-"+conf.getTopicName();
         final String FILEPATH = conf.getFilepath();
 
         Properties kafkaProps = new Properties();
