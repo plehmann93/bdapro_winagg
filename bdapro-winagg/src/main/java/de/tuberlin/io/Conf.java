@@ -33,6 +33,8 @@ public class Conf {
  int produceLoop;
  int timeout;
  int writeOutput;
+ String confPath="src/main/resources/config.ini";
+ String outputPath;
     public int getWindowType() {
         return windowType;
     }
@@ -87,10 +89,14 @@ public class Conf {
 
     public int getWriteOutput() {        return writeOutput;    }
 
+    public String getOutputPath() {        return outputPath;    }
+
+    public void setFilepath(String filepath) {        this.filepath = filepath;    }
+
     public Conf(){
 
     try {
-        Wini ini = new Wini(new File("src/main/resources/config.ini"));
+        Wini ini = new Wini(new File(confPath));
 
         windowType = ini.get("window", "window_type", int.class);
         windowSize = ini.get("window", "window_size", int.class);
@@ -115,9 +121,45 @@ public class Conf {
         produceLoop =ini.get("kafka", "produce_loop", int.class);
         timeout =ini.get("system", "timeout", int.class);
         writeOutput =ini.get("system", "write_output", int.class);
+        outputPath =ini.get("system", "outputPath");
     }catch (IOException e){
         e.printStackTrace();
     }
+
+    }
+
+    public Conf(String newConfPath){
+
+        try {
+            Wini ini = new Wini(new File(newConfPath));
+
+            windowType = ini.get("window", "window_type", int.class);
+            windowSize = ini.get("window", "window_size", int.class);
+            windowSlideSize = ini.get("window", "window_slide_size", int.class);
+            countSize = ini.get("window", "count_number", int.class);
+            servingSpeedFactor = ini.get("kafka", "serving_speed_factor", int.class);
+            maxEventDelay = ini.get("kafka", "max_event_delay", int.class);
+            localZookeeperHost= ini.get("kafka", "local_zookeeper_host");
+            localKafkaBroker= ini.get("kafka", "local_kafka_broker");
+            groupId= ini.get("kafka", "group_id");
+            topicName= ini.get("kafka", "topic_name");
+            master= ini.get("spark", "master");
+            filepath= ini.get("kafka", "filepath");
+            flink= ini.get("system", "flink", int.class);
+            fromKafka= ini.get("system", "from_kafka", int.class);
+            batchsize= ini.get("spark", "batchsize", int.class);
+            maxReceiverRate=ini.get("spark", "max_receiver_rate", int.class);
+            kafkaProducer=ini.get("system", "kafka_producer", int.class);
+            newOffset=ini.get("kafka", "new_offset", int.class);
+            workload =ini.get("kafka", "workload", int.class);
+            numberRecords =ini.get("kafka", "number_records", int.class);
+            produceLoop =ini.get("kafka", "produce_loop", int.class);
+            timeout =ini.get("system", "timeout", int.class);
+            writeOutput =ini.get("system", "write_output", int.class);
+            outputPath =ini.get("system", "outputPath");
+        }catch (IOException e){
+            e.printStackTrace();
+        }
 
     }
 }

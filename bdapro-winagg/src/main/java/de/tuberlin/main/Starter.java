@@ -10,7 +10,15 @@ import de.tuberlin.windows.*;
 public class Starter {
 
     public static void main(String[] args) throws Exception {
-        Conf conf = new Conf();
+        Conf conf;
+        if (args.length==0){
+            conf=  new Conf();
+        }else{
+            conf = new Conf(args[0]);
+        }
+        if(args.length==2){
+            conf.setFilepath(args[1]);
+        }
         if (conf.getKafkaProducer()==1){
             (new KafkaProducer(conf)).start(); //for writing into kafka
         }
