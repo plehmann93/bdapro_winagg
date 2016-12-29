@@ -23,7 +23,7 @@ then
 fi
 
 #printf "%s\n" "${files[@]}" > "$(date +%s%3N)".csv
-printf "%s\n" "${files[@]}" > "${name##*-}".csv
+printf "%s\n" "${files[@]}" > "${name##*_}".csv
 
 find -type d -name "fil*" -exec rm -rf {} +;
 
