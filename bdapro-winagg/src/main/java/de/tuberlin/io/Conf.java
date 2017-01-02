@@ -35,6 +35,7 @@ public class Conf {
  int writeOutput;
  String confPath="src/main/resources/config.ini";
  String outputPath;
+ int clusterMode;
     public int getWindowType() {
         return windowType;
     }
@@ -93,6 +94,8 @@ public class Conf {
 
     public void setFilepath(String filepath) {        this.filepath = filepath;    }
 
+    public int getClusterMode() {        return clusterMode;    }
+
     public Conf(){
 
     try {
@@ -121,6 +124,7 @@ public class Conf {
         produceLoop =ini.get("kafka", "produce_loop", int.class);
         timeout =ini.get("system", "timeout", int.class);
         writeOutput =ini.get("system", "write_output", int.class);
+        clusterMode =ini.get("system", "cluster_mode", int.class);
         outputPath =ini.get("system", "output_path");
     }catch (IOException e){
         e.printStackTrace();
@@ -156,7 +160,8 @@ public class Conf {
             produceLoop =ini.get("kafka", "produce_loop", int.class);
             timeout =ini.get("system", "timeout", int.class);
             writeOutput =ini.get("system", "write_output", int.class);
-            outputPath =ini.get("system", "outputPath");
+            outputPath =ini.get("system", "output_path");
+            clusterMode =ini.get("system", "cluster_mode", int.class);
         }catch (IOException e){
             e.printStackTrace();
         }

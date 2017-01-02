@@ -1,9 +1,5 @@
 package de.tuberlin.io;
 
-import com.dataartisans.flinktraining.exercises.datastream_java.datatypes.TaxiRide;
-import org.joda.time.DateTime;
-import org.joda.time.format.DateTimeFormat;
-import org.joda.time.format.DateTimeFormatter;
 
 import java.util.Locale;
 
@@ -12,19 +8,16 @@ import java.util.Locale;
  */
 
 import java.util.Locale;
-import org.joda.time.DateTime;
-import org.joda.time.format.DateTimeFormat;
-import org.joda.time.format.DateTimeFormatter;
 
 
 public class TaxiRideClass {
 
 
-        private static transient DateTimeFormatter timeFormatter;
+        //private static transient DateTimeFormatter timeFormatter;
         public long rideId;
         public boolean isStart;
-        public DateTime startTime;
-        public DateTime endTime;
+        public String startTime;
+        public String endTime;
         public float startLon;
         public float startLat;
         public float endLon;
@@ -34,7 +27,7 @@ public class TaxiRideClass {
         public TaxiRideClass() {
         }
 
-        public TaxiRideClass(long rideId, boolean isStart, DateTime startTime, DateTime endTime, float startLon, float startLat, float endLon, float endLat, short passengerCnt,Long timestamp) {
+        public TaxiRideClass(long rideId, boolean isStart, String startTime, String endTime, float startLon, float startLat, float endLon, float endLat, short passengerCnt,Long timestamp) {
             this.rideId = rideId;
             this.isStart = isStart;
             this.startTime = startTime;
@@ -52,11 +45,11 @@ public class TaxiRideClass {
             sb.append(this.rideId).append(",");
             sb.append(this.isStart?"START":"END").append(",");
             if(this.isStart) {
-                sb.append(this.startTime.toString(timeFormatter)).append(",");
-                sb.append(this.endTime.toString(timeFormatter)).append(",");
+                sb.append(this.startTime).append(",");
+                sb.append(this.endTime).append(",");
             } else {
-                sb.append(this.endTime.toString(timeFormatter)).append(",");
-                sb.append(this.startTime.toString(timeFormatter)).append(",");
+                sb.append(this.endTime).append(",");
+                sb.append(this.startTime).append(",");
             }
 
             sb.append(this.startLon).append(",");
@@ -94,13 +87,13 @@ public class TaxiRideClass {
                     switch(var4) {
                         case 0:
                             ride.isStart = true;
-                            ride.startTime = DateTime.parse(tokens[2], timeFormatter);
-                            ride.endTime = DateTime.parse(tokens[3], timeFormatter);
+                            ride.startTime = tokens[2];
+                            ride.endTime = tokens[3];
                             break;
                         case 1:
                             ride.isStart = false;
-                            ride.endTime = DateTime.parse(tokens[2], timeFormatter);
-                            ride.startTime = DateTime.parse(tokens[3], timeFormatter);
+                            ride.endTime = tokens[2];
+                            ride.startTime = tokens[3];
                             break;
                         default:
                             throw new RuntimeException("Invalid record: " + line);
@@ -127,9 +120,6 @@ public class TaxiRideClass {
             return (int)this.rideId;
         }
 
-        static {
-            timeFormatter = DateTimeFormat.forPattern("yyyy-MM-dd HH:mm:ss").withLocale(Locale.US).withZoneUTC();
-        }
 
 
 }

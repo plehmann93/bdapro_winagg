@@ -8,9 +8,15 @@ for i in $(ls); do
 	if [[ $i =~ ^fil.* ]];
 	then
 		bool=false
-		files[$num]=`cat $i/part-00000`
-		num=$((num+1))
-		declare name=$i
+		txt=`cat $i/part-00000`
+		if [[ -z $txt ]];
+		then
+		    tdad=3
+        else
+            files[$num]=`cat $i/part-00000`
+		    num=$((num+1))
+            declare name=$i
+        fi
 		#echo $i
 #name=${name
 		

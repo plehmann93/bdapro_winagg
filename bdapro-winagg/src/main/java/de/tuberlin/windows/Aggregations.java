@@ -1,7 +1,6 @@
 package de.tuberlin.windows;
 
 
-import com.dataartisans.flinktraining.exercises.datastream_java.datatypes.TaxiRide;
 import de.tuberlin.io.TaxiRideClass;
 import org.apache.flink.api.common.functions.MapFunction;
 import org.apache.flink.api.common.functions.ReduceFunction;
@@ -11,7 +10,6 @@ import org.apache.flink.streaming.api.functions.windowing.WindowFunction;
 import org.apache.flink.streaming.api.operators.TimestampedCollector;
 import org.apache.flink.streaming.api.windowing.windows.TimeWindow;
 import org.apache.flink.streaming.runtime.streamrecord.StreamRecord;
-import org.apache.flink.streaming.runtime.tasks.ProcessingTimeCallback;
 import org.apache.flink.util.Collector;
 
 import java.util.Date;
@@ -21,18 +19,7 @@ import java.util.Date;
  */
 public class Aggregations {
 
-    /**
-     Maps Taxiride so just id of ride and passengercount stays
-     */
-    public static class MapToPassenger implements MapFunction<TaxiRide, Tuple3<Integer, Integer,Long>> {
 
-
-        @Override
-        public Tuple3<Integer, Integer,Long> map(TaxiRide taxiRide) throws Exception {
-            return new Tuple3<Integer,Integer,Long>(1, Integer.valueOf(taxiRide.passengerCnt),System.currentTimeMillis() );
-
-        }
-    }
 
     /**
      Maps Taxiride so just id of ride and passengercount stays
@@ -59,7 +46,6 @@ public class Aggregations {
             Long millis=System.currentTimeMillis();
             String timeStamp = new Date(millis).toString();
             Long duration=millis-t.f2;
-
             return new Tuple4<Double,Long,Long,Long>(Math.round(t.f1/new Double(t.f0)*1000)/1000.0,t.f0, duration,millis);
 
         }
@@ -111,54 +97,6 @@ public class Aggregations {
 
 
 
-
-    public static class TimeStamp implements TimestampExtractor<TaxiRide>
-
-    {
-        @Override
-        public long extractTimestamp(TaxiRide element, long currentTimestamp) {
-            return currentTimestamp;
-        }
-
-        @Override
-        public long extractWatermark(TaxiRide element, long currentTimestamp) {
-            return currentTimestamp - 1000;
-        }
-
-        @Override
-        public long getCurrentWatermark() {
-            return Long.MIN_VALUE;
-        }
-    }
-
-    /**
-     * Returns the average number of passengers in a specific time window
-     */
-    public static class TSExtractor implements WindowFunction<
-            Tuple3<Integer, Integer,Long>, // input type
-            Tuple5<Double,String,Long,Long,Long>, // output type
-            Tuple, // key type
-            TimeWindow> // window type
-    {
-
-        @SuppressWarnings("unchecked")
-        @Override
-        public void apply(
-                Tuple key,
-                TimeWindow window,
-                Iterable<Tuple3<Integer, Integer,Long>> values,
-                Collector<Tuple5<Double,String,Long,Long,Long>> out) throws Exception {
-
-            Double cnt = 0.0;
-            Double mean = 0.0;
-            Long ts=0L;
-            Tuple3<Integer, Integer,Long> value=values.iterator().next();
-            mean= Math.round(value.f1*1000.0/value.f0)/1000.0;
-            Long millis=System.currentTimeMillis();
-            Long duration= ts-window.maxTimestamp();
-            out.collect(new Tuple5<Double,String,Long,Long,Long>(mean,String.valueOf(value.f0),millis , value.f2,window.getEnd()));
-        }
-    }
 
 
     /**

@@ -99,7 +99,7 @@ public void run(){
         final String FILEPATH = conf.getFilepath();
 
         Properties kafkaProps = new Properties();
-        kafkaProps.put("bootstrap.servers", "localhost:9092");
+        kafkaProps.put("bootstrap.servers", conf.getLocalKafkaBroker());
         kafkaProps.put("acks", "all");
         kafkaProps.put("retries", "0");
         kafkaProps.put("batch.size", "16384");
@@ -140,7 +140,7 @@ public void run(){
 
         }
 
-
+    this.interrupt();
 
     }
 
