@@ -43,6 +43,8 @@ public void run(){
         String systemname="spark";
         if (conf.getFlink() == 1) {
             systemname="flink";
+        }else if(conf.getFlink() == 4){
+            systemname="flink";
         }
         final String TOPIC_NAME = systemname+"-"+conf.getTopicName();
         Properties kafkaProps = new Properties();
@@ -94,6 +96,8 @@ public void run(){
         String systemname="spark";
         if (conf.getFlink() == 1) {
             systemname="flink";
+        }else if(conf.getFlink() == 4){
+        systemname="flink";
         }
         final String TOPIC_NAME = systemname+"-"+conf.getTopicName();
         final String FILEPATH = conf.getFilepath();
