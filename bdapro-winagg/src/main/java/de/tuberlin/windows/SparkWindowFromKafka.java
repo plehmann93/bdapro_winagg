@@ -55,10 +55,9 @@ public class SparkWindowFromKafka implements Serializable{
                 .setAppName(APPLICATION_NAME)
               // .set("spark.streaming.kafka.maxRatePerPartition",String.valueOf(conf.getWorkload()))
               //  .set("spark.streaming.backpressure.enabled","true")
-                //.set("spark.streaming.backpressure.initialRate","1000")
+                .set("spark.streaming.backpressure.initialRate","1000")
                 .setMaster(MASTER);
-
-
+        System.out.println("Starting reading from "+TOPIC_NAME);
        JavaSparkContext sc = new JavaSparkContext(sparkConf);
         sc.setLogLevel("WARN");
         JavaStreamingContext jssc = new JavaStreamingContext(sc, new Duration(batchsize*multiplication_factor));

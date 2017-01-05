@@ -109,7 +109,7 @@ public void run(){
         kafkaProps.put("buffer.memory", "3354432");
         kafkaProps.put("key.serializer", "org.apache.kafka.common.serialization.StringSerializer");
         kafkaProps.put("value.serializer", "org.apache.kafka.common.serialization.StringSerializer");
-
+        System.out.println("Starting writing to "+TOPIC_NAME);
         Long fileSize=Files.lines(Paths.get(FILEPATH)).count();
         int maxRate=conf.getWorkload();
         final int numberLoops=conf.getNumberRecords()/maxRate;

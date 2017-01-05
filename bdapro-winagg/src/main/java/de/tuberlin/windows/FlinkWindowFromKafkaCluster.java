@@ -27,6 +27,7 @@ public class FlinkWindowFromKafkaCluster {
         final String GROUP_ID = conf.getGroupId();
         final String TOPIC_NAME = "flink-"+conf.getTopicName();
         //private static final String GROUP_ID = "test";
+        System.out.println("Starting reading from "+TOPIC_NAME);
 
         final int servingSpeedFactor = conf.getServingSpeedFactor(); // events of 10 minutes are served in 1 second
         final int countNumber = conf.getCountSize();         //size of elements in each window

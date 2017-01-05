@@ -41,7 +41,7 @@ public class SparkWindowFromKafkaCluster implements Serializable{
         final String GROUP_ID = conf.getGroupId();
         final String TOPIC_NAME="spark-"+conf.getTopicName();
         final String MASTER=conf.getMaster();
-
+        System.out.println("Starting reading from "+TOPIC_NAME);
 
         final int batchsize = conf.getBatchsize();         //size of elements in each window
         final int windowTime = conf.getWindowSize();          //measured in seconds
