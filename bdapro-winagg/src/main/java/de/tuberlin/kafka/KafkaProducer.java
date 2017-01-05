@@ -87,8 +87,6 @@ public void run(){
 
                 }
 
-
-
         }
 
     public void writeToKafkaLoop(Conf conf) throws IOException,InterruptedException {

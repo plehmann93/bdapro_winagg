@@ -56,7 +56,7 @@ public class SparkWindowFromKafkaCluster implements Serializable{
         SparkConf sparkConf = new SparkConf()
                 .setAppName(APPLICATION_NAME)
               // .set("spark.streaming.kafka.maxRatePerPartition",String.valueOf(conf.getWorkload()))
-              //  .set("spark.streaming.backpressure.enabled","true")
+                .set("spark.streaming.backpressure.enabled","true")
                 //.set("spark.streaming.backpressure.initialRate","1000")
                 .setMaster(MASTER);
 
