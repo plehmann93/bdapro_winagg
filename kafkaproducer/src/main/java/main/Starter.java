@@ -9,7 +9,7 @@ import kafkaProducer.KafkaProducer;
 public class Starter {
 
     public static void main(String[] args) throws Exception {
-    System.out.println("Begin with writing");
+    System.out.println("Begin with writing "+args[0]+" "+args[1]+" "+args[2]);
         Conf conf;
         if (args.length == 0) {
             conf = new Conf();

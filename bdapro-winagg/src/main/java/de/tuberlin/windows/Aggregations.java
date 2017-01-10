@@ -13,6 +13,7 @@ import org.apache.flink.streaming.runtime.streamrecord.StreamRecord;
 import org.apache.flink.util.Collector;
 
 import java.util.Date;
+import java.util.Random;
 
 /**
  * Created by Lehmann on 01.12.2016.
@@ -24,13 +25,14 @@ public class Aggregations {
     /**
      Maps Taxiride so just id of ride and passengercount stays
      */
-    public static class MapPassenger implements MapFunction<String, Tuple3<Long, Long,Long>> {
+    public static class MapPassenger implements MapFunction<String, Tuple4<Integer,Long, Long,Long>> {
 
 
         @Override
-        public Tuple3<Long, Long,Long> map(String line) throws Exception {
+        public Tuple4<Integer,Long, Long,Long> map(String line) throws Exception {
             TaxiRideClass taxi=TaxiRideClass.fromString(line);
-            return new Tuple3<Long,Long,Long>(1L, Long.valueOf(taxi.passengerCnt),taxi.timestamp );
+            int ran=new Random().nextInt(9)+1;
+            return new Tuple4<Integer,Long,Long,Long>(ran,1L, Long.valueOf(taxi.passengerCnt),taxi.timestamp );
 
         }
     }
@@ -39,14 +41,14 @@ public class Aggregations {
     /**
      Maps Taxiride so just id of ride and passengercount stays
      */
-    public static class MapToMean implements MapFunction< Tuple3<Long, Long,Long> , Tuple4<Double, Long,Long,Long>> {
+    public static class MapToMean implements MapFunction< Tuple4<Integer,Long, Long,Long> , Tuple4<Double, Long,Long,Long>> {
 
 
-        public Tuple4<Double,Long,Long,Long> map( Tuple3<Long, Long,Long> t) throws Exception {
+        public Tuple4<Double,Long,Long,Long> map( Tuple4<Integer,Long, Long,Long> t) throws Exception {
             Long millis=System.currentTimeMillis();
-            String timeStamp = new Date(millis).toString();
-            Long duration=millis-t.f2;
-            return new Tuple4<Double,Long,Long,Long>(Math.round(t.f1/new Double(t.f0)*1000)/1000.0,t.f0, duration,millis);
+
+            Long duration=millis-t.f3;
+            return new Tuple4<Double,Long,Long,Long>(Math.round(t.f2/new Double(t.f1)*1000)/1000.0,t.f1, duration,millis);
 
         }
     }
@@ -82,14 +84,14 @@ public class Aggregations {
     }
 
 
-    public static class SumAllValues implements ReduceFunction<Tuple3<Long, Long,Long>> {
+    public static class SumAllValues implements ReduceFunction<Tuple4<Integer,Long, Long,Long>> {
         @Override
-        public Tuple3<Long, Long,Long> reduce(Tuple3<Long, Long,Long> value1, Tuple3<Long, Long,Long> value2) throws Exception {
-           Long time=value1.f2;
-            if(value1.f2<value2.f2){
-                time=value2.f2;
+        public Tuple4<Integer,Long, Long,Long> reduce(Tuple4<Integer,Long, Long,Long> value1, Tuple4<Integer,Long, Long,Long> value2) throws Exception {
+           Long time=value1.f3;
+            if(value1.f3<value2.f3){
+                time=value2.f3;
             }
-            return new Tuple3<Long, Long,Long>(value1.f0+value2.f0, value1.f1+value2.f1,time);
+            return new Tuple4<Integer,Long, Long,Long>(value1.f0,value1.f1+value2.f1, value1.f2+value2.f2,time);
         }
     }
 

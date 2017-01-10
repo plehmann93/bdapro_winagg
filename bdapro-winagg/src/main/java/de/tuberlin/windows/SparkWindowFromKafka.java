@@ -9,10 +9,12 @@ import org.apache.kafka.common.serialization.StringDeserializer;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 //import org.apache.kafka.common.serialization.StringDeserializer;
 import org.apache.spark.SparkConf;
+import org.apache.spark.api.java.JavaPairRDD;
 import org.apache.spark.api.java.JavaSparkContext;
 import org.apache.spark.streaming.Duration;
 import org.apache.spark.streaming.api.java.JavaDStream;
 import org.apache.spark.streaming.api.java.JavaInputDStream;
+import org.apache.spark.streaming.api.java.JavaPairDStream;
 import org.apache.spark.streaming.api.java.JavaStreamingContext;
 
 import org.apache.spark.streaming.kafka010.*;
@@ -90,12 +92,15 @@ public class SparkWindowFromKafka implements Serializable{
         );
 
 
-/*
 
-*/
+
+
+
         JavaDStream<Tuple4<Double, Long, Long,Long>> averagePassengers=messages
-        //messages
-                .map(x->new Tuple3<Long,Long,Long>(1L,Long.valueOf(TaxiRideClass.fromString(x.value()).passengerCnt)
+        //message
+
+                .map(x->new Tuple4<Integer,Long,Long,Long>(
+                        new Random().nextInt(9)+1, 1L,Long.valueOf(TaxiRideClass.fromString(x.value()).passengerCnt)
                             ,TaxiRideClass.fromString(x.value()).timestamp))
 
 

@@ -51,10 +51,7 @@ public class FlinkWindowFromKafkaCluster {
             kafkaProps.setProperty("group.id", conf.getGroupId());
         }
 
-       // kafkaProps.setProperty("max.partition.fetch.bytes","200");
-        //kafkaProps.setProperty("fetch.max.bytes","200");
-        //kafkaProps.setProperty("receive.buffer.bytes","250");
-        //kafkaProps.setProperty("max.poll.records","500");
+
         // always read the Kafka topic from the start
         kafkaProps.setProperty("auto.offset.reset", "latest");
         kafkaProps.setProperty("enable.auto.commit", "true");
@@ -65,15 +62,10 @@ public class FlinkWindowFromKafkaCluster {
                 TOPIC_NAME,
                 new FlinkSimpleStringTsSchema(),
                 kafkaProps);
-        // assign a timestamp extractor to the consumer
-        //    consumer.assignTimestampsAndWatermarks(new org.apache.flink.quickstart.FromKafka.TaxiRideTSExtractor());
-        //consumer.getIterationRuntimeContext()
+
         // create a TaxiRide data stream
         DataStream<String> rides = env.addSource(consumer);
-      //  rides.getTransformation().getOutputType().
-//rides.print();
-        //StreamRecord r=new StreamRecord();
-        //r.getTimestamp():
+
         // find average number of passengers per minute starting a taxi ride
        DataStream<Tuple4<Double, Long, Long,Long>> averagePassengers = rides
 
