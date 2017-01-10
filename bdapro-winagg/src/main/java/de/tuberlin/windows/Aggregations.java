@@ -32,7 +32,7 @@ public class Aggregations {
         public Tuple4<Integer,Long, Long,Long> map(String line) throws Exception {
             TaxiRideClass taxi=TaxiRideClass.fromString(line);
             int ran=new Random().nextInt(9)+1;
-            return new Tuple4<Integer,Long,Long,Long>(ran,1L, Long.valueOf(taxi.passengerCnt),taxi.timestamp );
+            return new Tuple4<Integer,Long,Long,Long>(1,1L, Long.valueOf(taxi.passengerCnt),taxi.timestamp );
 
         }
     }

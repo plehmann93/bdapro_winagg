@@ -99,8 +99,8 @@ public class SparkWindowFromKafka implements Serializable{
         JavaDStream<Tuple4<Double, Long, Long,Long>> averagePassengers=messages
         //message
 
-                .map(x->new Tuple4<Integer,Long,Long,Long>(
-                        new Random().nextInt(9)+1, 1L,Long.valueOf(TaxiRideClass.fromString(x.value()).passengerCnt)
+                .map(x->new Tuple3<Long,Long,Long>(
+                       1L,Long.valueOf(TaxiRideClass.fromString(x.value()).passengerCnt)
                             ,TaxiRideClass.fromString(x.value()).timestamp))
 
 
