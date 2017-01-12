@@ -20,7 +20,7 @@ import java.util.Properties;
 public class FlinkWindowFromKafka2 {
 
 
-    public FlinkWindowFromKafka(Conf conf) throws Exception {
+    public FlinkWindowFromKafka2(Conf conf) throws Exception {
 
 
         final String LOCAL_ZOOKEEPER_HOST = conf.getLocalZookeeperHost();
