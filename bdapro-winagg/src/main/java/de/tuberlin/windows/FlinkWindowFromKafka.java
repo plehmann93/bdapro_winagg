@@ -51,10 +51,7 @@ public class FlinkWindowFromKafka {
             kafkaProps.setProperty("group.id", conf.getGroupId());
         }
 
-       // kafkaProps.setProperty("max.partition.fetch.bytes","200");
-        //kafkaProps.setProperty("fetch.max.bytes","200");
-        //kafkaProps.setProperty("receive.buffer.bytes","250");
-        //kafkaProps.setProperty("max.poll.records","500");
+
         // always read the Kafka topic from the start
         kafkaProps.setProperty("auto.offset.reset", "latest");
         kafkaProps.setProperty("enable.auto.commit", "true");
@@ -67,23 +64,12 @@ public class FlinkWindowFromKafka {
                 TOPIC_NAME,
                 new FlinkSimpleStringTsSchema(),
                 kafkaProps);
-        // assign a timestamp extractor to the consumer
-        //    consumer.assignTimestampsAndWatermarks(new org.apache.flink.quickstart.FromKafka.TaxiRideTSExtractor());
-        //consumer.getIterationRuntimeContext()
-        // create a TaxiRide data stream
+
         DataStream<String> rides = env.addSource(consumer);
-      //  rides.getTransformation().getOutputType().
-//rides.print();
-        //StreamRecord r=new StreamRecord();
-        //r.getTimestamp():
+
         // find average number of passengers per minute starting a taxi ride
        DataStream<Tuple4<Double, Long, Long,Long>> averagePassengers = rides
 
-                //filter out those events that are not starting
-
-               // .filter(x -> x.isStart)
-
-                //just keep important variables
 
 
                 .map(new Aggregations.MapPassenger())
@@ -95,18 +81,14 @@ public class FlinkWindowFromKafka {
                 // sliding window
                 .timeWindow(Time.milliseconds(windowTime), Time.milliseconds(slidingTime))
 
-                //.timeWindowAll(Time.milliseconds(windowTime), Time.milliseconds(slidingTime)
+
 
                 //sums the 1s and the passengers for the whole window
                 .reduce(new Aggregations.SumAllValues())
                 //.reduce(new Aggregations.SumAllValues(),new Aggregations.TSExtractor())
 
                 .map(new Aggregations.MapToMean())
-             //   .map(new Aggregations.MapToMean2())
 
-              //  .keyBy(0)
-               // .timeWindow(Time.milliseconds(windowTime), Time.milliseconds(slidingTime))
-               // .apply(new Aggregations.TSExtractor())
                 ;
 
 

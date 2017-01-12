@@ -39,9 +39,7 @@ public class FlinkWindowFromKafkaCluster {
         StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
         env.setStreamTimeCharacteristic(TimeCharacteristic.ProcessingTime);
 
-        //enable latency tracking
-        //env.getConfig().setLatencyTrackingInterval(2000);
-        // env.getConfig().setAutoWatermarkInterval(1000);
+
 
         // configure the Kafka consumer
         Properties kafkaProps = new Properties();
@@ -69,14 +67,11 @@ public class FlinkWindowFromKafkaCluster {
         // find average number of passengers per minute starting a taxi ride
        DataStream<Tuple4<Double, Long, Long,Long>> averagePassengers = rides
 
-                //filter out those events that are not starting
-
-               // .filter(x -> x.isStart)
 
                 //just keep important variables
 
 
-                .map(new Aggregations.MapPassenger())
+                .map(new Aggregations.MapPassengerClust())
                 //grouping all values
 
                 .keyBy(0)
@@ -85,18 +80,15 @@ public class FlinkWindowFromKafkaCluster {
                 // sliding window
                 .timeWindow(Time.milliseconds(windowTime), Time.milliseconds(slidingTime))
 
-                //.timeWindowAll(Time.milliseconds(windowTime), Time.milliseconds(slidingTime)
+
 
                 //sums the 1s and the passengers for the whole window
                 .reduce(new Aggregations.SumAllValues())
                 //.reduce(new Aggregations.SumAllValues(),new Aggregations.TSExtractor())
 
                 .map(new Aggregations.MapToMean())
-             //   .map(new Aggregations.MapToMean2())
 
-              //  .keyBy(0)
-               // .timeWindow(Time.milliseconds(windowTime), Time.milliseconds(slidingTime))
-               // .apply(new Aggregations.TSExtractor())
+
                 ;
 
 
@@ -120,7 +112,7 @@ public class FlinkWindowFromKafkaCluster {
      //   averagePassengers.writeAsCsv(filePath);
 
         // execute the transformation pipeline
-        env.execute("Windowed Aggregation from Kafka with Flink");
+        env.execute("Flink");
 
     }
 

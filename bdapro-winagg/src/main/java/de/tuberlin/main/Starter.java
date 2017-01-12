@@ -37,7 +37,7 @@ public class Starter {
 
 
         }else if(conf.getFlink() == 0){
-            if(conf.getClusterMode()==47){
+            if(conf.getClusterMode()==1){
                 new SparkWindowFromKafkaCluster(conf);
             }else{
                 new SparkWindowFromKafka(conf);

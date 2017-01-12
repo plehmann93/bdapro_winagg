@@ -37,7 +37,20 @@ public class Aggregations {
         }
     }
 
+    /**
+     Maps Taxiride so just id of ride and passengercount stays
+     */
+    public static class MapPassengerClust implements MapFunction<String, Tuple4<Integer,Long, Long,Long>> {
 
+
+        @Override
+        public Tuple4<Integer,Long, Long,Long> map(String line) throws Exception {
+            TaxiRideClass taxi=TaxiRideClass.fromString(line);
+            int ran=new Random().nextInt(9)+1;
+            return new Tuple4<Integer,Long,Long,Long>(ran,1L, Long.valueOf(taxi.passengerCnt),taxi.timestamp );
+
+        }
+    }
     /**
      Maps Taxiride so just id of ride and passengercount stays
      */
