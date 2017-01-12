@@ -32,7 +32,7 @@ public class Starter {
             if(conf.getClusterMode()==1){
                 new FlinkWindowFromKafkaCluster(conf);
             }else{
-                new FlinkWindowFromKafka(conf);
+                new FlinkWindowFromKafka2(conf);
             }
 
 
